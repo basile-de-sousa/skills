@@ -1,0 +1,4 @@
+# Skills publiés par scripts/release.sh, un nom par ligne.
+# Critères d'entrée : docs/architecture.md (Ce qui est publié)
+spec
+trad

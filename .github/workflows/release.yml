@@ -1,0 +1,21 @@
+name: release
+# À chaque tag <skill>-AAAA.MM.JJ : construit le zip du skill et l'attache à une Release GitHub.
+on:
+  push:
+    tags: ['*-20*']
+permissions:
+  contents: write
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip et Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          name=$(printf '%s' "$TAG" | sed -E 's/-[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$//')
+          test -f "skills/$name/SKILL.md"
+          (cd skills && zip -r "../$name.zip" "$name")
+          gh release create "$TAG" "$name.zip" --title "$TAG" --notes "$(git log -1 --format=%b)"
