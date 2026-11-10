@@ -27,6 +27,8 @@ Aucun téléchargement manuel. Version : date de la release, `AAAA.MM.JJ` (suffi
 
 La release part d'une session Claude et non d'une CI sur le repo du skill. Pourquoi : le texte du skill n'existe que sur claude.ai, qu'une CI ne peut pas lire ; seule une session en a la copie.
 
+Un skill sans repo (`trad`, `note`) n'a ni specs ni ADR : son historique ici et ses notes de release suffisent.
+
 La note de release (`RELEASE_NOTE`) résume le changement pour ceux qui installent le skill. Le raisonnement complet reste dans le repo du skill.
 
 ## Ce qui est publié
@@ -41,4 +43,3 @@ Non publiés, par choix : `grill-me-solo`, `skill-audit`.
 
 ## Open questions
 - **Fraîcheur du cache** : la copie sur disque date probablement du début de la session ; une release lancée juste après une modification dans la même conversation pourrait publier l'ancienne version. Réglé par : un test à la prochaine modification d'un skill.
-- **Skills sans repo** (`trad`, `note`) : où va leur pourquoi le jour où ils en ont un ? Réglé par : le premier cas réel ; d'ici là, la note de release suffit.
