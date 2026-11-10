@@ -106,5 +106,16 @@ if [ "$RC" -eq 0 ] && cmp -s "$T/src/e/SKILL.md" skills/e/SKILL.md; then
   ok "SPEC-001 AC4: un skill sans bloc Config est publié tel quel"
 else fail "SPEC-001 AC4: un skill sans bloc Config est publié tel quel"; fi
 
+# AC4 : fichier sans saut de ligne final, avec et sans bloc Config
+setup f g
+mkdir -p "$T/src/f" "$T/src/g"
+printf '# F\nSans saut de ligne final.' > "$T/src/f/SKILL.md"
+printf '# G\n<!-- config -->\n- Repo : `acme/data`\n<!-- /config -->\nFin sans saut de ligne.' > "$T/src/g/SKILL.md"
+run
+if [ "$RC" -eq 0 ] && cmp -s "$T/src/f/SKILL.md" skills/f/SKILL.md \
+   && [ -n "$(tail -c1 skills/g/SKILL.md)" ] && grep -q '`<à définir>`' skills/g/SKILL.md; then
+  ok "SPEC-001 AC4: l'absence de saut de ligne final est conservée"
+else fail "SPEC-001 AC4: l'absence de saut de ligne final est conservée"; fi
+
 [ "$fails" -eq 0 ] && echo "Tous les tests passent." || echo "$fails test(s) en échec."
 exit "$fails"

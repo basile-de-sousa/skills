@@ -28,7 +28,10 @@ failed=""
 # <!-- /config -->) : chaque valeur entre backticks devient `<à définir>`.
 # Échoue fermé : bloc mal formé, ou valeur masquée encore présente ailleurs -> code 1.
 mask_config() {
-  dir=$1; f="$dir/SKILL.md"; vals=$(mktemp); out=$(mktemp)
+  dir=$1; f="$dir/SKILL.md"
+  # Sans bloc Config, ne pas toucher au fichier : la copie reste identique à claude.ai.
+  grep -q -- '<!-- config -->' "$f" || return 0
+  vals=$(mktemp); out=$(mktemp)
   if ! awk -v vals="$vals" '
     /<!-- config -->/  { inb = 1; print; next }
     /<!-- \/config -->/ { inb = 0; print; next }
@@ -49,7 +52,9 @@ mask_config() {
     }' "$f" > "$out"; then
     rm -f "$vals" "$out"; return 1
   fi
-  cat "$out" > "$f"; rm -f "$out"
+  # awk termine toujours par un saut de ligne : garder le fichier sans, s'il n'en avait pas.
+  if [ -n "$(tail -c1 "$f")" ]; then printf '%s' "$(cat "$out")" > "$f"; else cat "$out" > "$f"; fi
+  rm -f "$out"
   leak=0
   while IFS= read -r v; do
     [ -n "$v" ] || continue
