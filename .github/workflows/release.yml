@@ -1,21 +1,30 @@
 name: release
-# À chaque tag <skill>-AAAA.MM.JJ : construit le zip du skill et l'attache à une Release GitHub.
+# Pour chaque commit "release: <skill>-<version>" sans Release GitHub :
+# crée le tag, construit le zip du skill et l'attache à la Release.
+# Idempotent : relancer ne recrée rien.
 on:
   push:
-    tags: ['*-20*']
+    branches: [main]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
-  zip:
+  releases:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Zip et Release
+        with:
+          fetch-depth: 0
+      - name: Tags, zips et Releases
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: |
-          name=$(printf '%s' "$TAG" | sed -E 's/-[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$//')
-          test -f "skills/$name/SKILL.md"
-          (cd skills && zip -r "../$name.zip" "$name")
-          gh release create "$TAG" "$name.zip" --title "$TAG" --notes "$(git log -1 --format=%b)"
+          git log --reverse --format='%H %s' | while read -r sha subject; do
+            case "$subject" in "release: "*) ;; *) continue ;; esac
+            tag=${subject#release: }
+            name=$(printf '%s' "$tag" | sed -E 's/-[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$//')
+            if gh release view "$tag" >/dev/null 2>&1; then continue; fi
+            git archive --format=zip -o "$name.zip" "$sha:skills" "$name"
+            gh release create "$tag" "$name.zip" --target "$sha" --title "$tag" \
+              --notes "$(git log -1 --format=%b "$sha")"
+          done

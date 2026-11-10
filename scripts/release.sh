@@ -1,7 +1,8 @@
 #!/bin/sh
 # Copie les skills listés dans published.txt depuis le cache claude.ai de la session
-# vers skills/, puis crée un commit et un tag par skill modifié.
-# Usage : sh scripts/release.sh            (puis : git push --follow-tags)
+# vers skills/, puis crée un commit "release: <skill>-<version>" par skill modifié.
+# Le tag, le zip et la Release GitHub sont créés par la CI au push.
+# Usage : sh scripts/release.sh            (puis : git push)
 #   RELEASE_NOTE="pourquoi ce changement"  -> corps du commit, repris dans la Release GitHub
 #   SKILLS_DIR=/chemin/du/cache            -> si le cache n'est pas à l'endroit habituel
 set -eu
@@ -29,7 +30,7 @@ while read -r name; do
   git add -A "skills/$name"
   if git diff --cached --quiet; then continue; fi
   ver=$(date -u +%Y.%m.%d); tag="$name-$ver"; n=2
-  while git rev-parse -q --verify "refs/tags/$tag" >/dev/null; do
+  while git log --format=%s | grep -Fxq "release: $tag"; do
     tag="$name-$ver.$n"; n=$((n + 1))
   done
   if [ -n "${RELEASE_NOTE:-}" ]; then
@@ -37,7 +38,6 @@ while read -r name; do
   else
     git commit -q -m "release: $tag"
   fi
-  git tag "$tag"
   released="$released $tag"
 done < published.txt
 if [ -z "$released" ]; then echo "Rien à publier : le repo est à jour."; else echo "Publié :$released"; fi

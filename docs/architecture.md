@@ -16,12 +16,12 @@
 | `published.txt` | Liste des skills publiés |
 | `docs/` | Docs de ce repo uniquement |
 | `scripts/release.sh` | La release |
-| `.github/workflows/release.yml` | Zip et Release GitHub à chaque tag |
+| `.github/workflows/release.yml` | Tag, zip et Release GitHub pour chaque commit de release |
 
 ## Release
 1. Les skills du compte sont synchronisés sur le disque de chaque session Claude. `scripts/release.sh` copie ceux de `published.txt` dans `skills/`.
-2. Pour chaque skill modifié : un commit `release: <nom>-<version>` et un tag du même nom.
-3. Au push du tag, la GitHub Action construit `<nom>.zip` et l'attache à une Release. Le zip n'est jamais commité : un binaire n'a pas de diff.
+2. Pour chaque skill modifié : un commit `release: <nom>-<version>`.
+3. Au push sur `main`, la GitHub Action crée pour chaque commit de release le tag du même nom, construit `<nom>.zip` et l'attache à une Release. Pourquoi la CI et non la session : une session Claude ne peut pas pousser de tags. Le zip n'est jamais commité : un binaire n'a pas de diff.
 
 Aucun téléchargement manuel. Version : date de la release, `AAAA.MM.JJ` (suffixe `.2`, `.3` le même jour). Pourquoi : aucune décision humaine à chaque release ; le diff et la note de release disent ce qui change.
 
