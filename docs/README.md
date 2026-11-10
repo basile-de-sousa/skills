@@ -9,7 +9,7 @@ Docs de ce repo en tant que projet (le mécanisme de partage). Les docs de chaqu
 - [001](adr/001-source-de-verite-claude-ai.md) : la source de vérité est claude.ai, ce repo est une vitrine de partage.
 
 ## Specs
-- [001](specs/001-masquer-config-a-la-release.md) : masquer le bloc Config d'un skill à la release (ready).
+- [001](specs/001-masquer-config-a-la-release.md) : masquer le bloc Config d'un skill à la release (done).
 
 ## Ajouts projet
 - **Scope** des ADR : `all`, `release`, `publication`.
