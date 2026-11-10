@@ -11,11 +11,13 @@ Mes skills pour Claude, versionnés.
 |---|---|
 | [spec](skills/spec/SKILL.md) | Workflow spec-driven pour un repo git : specs, ADR, docs de vérité courante, exécution |
 | [trad](skills/trad/SKILL.md) | Entraînement à l'anglais : traduction FR↔EN avec reformulations |
+| [pin](skills/pin/SKILL.md) | Épingler un outil, site, techno, idée ou lecture avec un « utile quand », dans ton propre repo GitHub |
 
 ## Installer un skill
 
 1. Ouvrir [Releases](../../releases) et télécharger le zip du skill voulu.
 2. L'ajouter à ses skills dans claude.ai.
+3. Si le skill a un bloc Config à `<à définir>`, il te demandera tes valeurs (par exemple ton repo de données) au premier lancement.
 
 Avec Claude Code, copier le dossier `skills/<nom>/` dans `~/.claude/skills/` suffit.
 

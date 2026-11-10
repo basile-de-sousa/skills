@@ -2,3 +2,4 @@
 # Critères d'entrée : docs/architecture.md (Ce qui est publié)
 spec
 trad
+pin
