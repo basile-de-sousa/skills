@@ -1,5 +1,5 @@
 ---
-status: ready
+status: in-progress
 context: [architecture.md#release, architecture.md#ce-qui-est-publié]
 ---
 # SPEC-001: Masquer le bloc Config d'un skill à la release
