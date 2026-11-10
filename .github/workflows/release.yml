@@ -25,6 +25,13 @@ jobs:
             name=$(printf '%s' "$tag" | sed -E 's/-[0-9]{4}\.[0-9]{2}\.[0-9]{2}(\.[0-9]+)?$//')
             if gh release view "$tag" >/dev/null 2>&1; then continue; fi
             git archive --format=zip -o "$name.zip" "$sha:skills" "$name"
-            gh release create "$tag" "$name.zip" --target "$sha" --title "$tag" \
+            # Le jeton de la CI ne peut pas taguer un commit dont les workflows diffèrent
+            # de ceux de main : si le skill n'a pas bougé depuis, taguer HEAD (même contenu).
+            target=$sha
+            if ! git diff --quiet "$sha" HEAD -- .github/workflows &&
+               [ "$(git rev-parse "$sha:skills/$name")" = "$(git rev-parse "HEAD:skills/$name")" ]; then
+              target=$(git rev-parse HEAD)
+            fi
+            gh release create "$tag" "$name.zip" --target "$target" --title "$tag" \
               --notes "$(git log -1 --format=%b "$sha")"
           done
