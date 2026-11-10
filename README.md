@@ -12,6 +12,7 @@ Mes skills pour Claude, versionnés.
 | [spec](skills/spec/SKILL.md) | Workflow spec-driven pour un repo git : specs, ADR, docs de vérité courante, exécution |
 | [trad](skills/trad/SKILL.md) | Entraînement à l'anglais : traduction FR↔EN avec reformulations |
 | [pin](skills/pin/SKILL.md) | Épingler un outil, site, techno, idée ou lecture avec un « utile quand », dans ton propre repo GitHub |
+| [buzzword](skills/buzzword/SKILL.md) | Fiche ultra-courte pour comprendre et expliquer à l'oral un terme de stratégie IT ou d'architecture SI |
 
 ## Installer un skill
 

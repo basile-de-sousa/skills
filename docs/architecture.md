@@ -41,6 +41,6 @@ Le repo est public, sans licence (choix de Basile). Un skill entre dans `publish
 - ses exemples ne contiennent rien de personnel (projets, idées de produit) ;
 - Basile en est l'auteur.
 
-Publiés : `spec`, `trad`, `pin`.
-En attente de leur bloc Config : `sonar`, `buzzword`, `methodo`, `note`, `skills-release`. La spec de ce travail vit dans le repo de chaque skill.
-Non publiés, par choix : `grill-me-solo`, `skill-audit`.
+Publiés : `spec`, `trad`, `pin`, `buzzword`.
+En attente de leur bloc Config : `note`, `skills-release`.
+Non publiés, par choix : `methodo`, `sonar` (pas partagés pour l'instant), `grill-me-solo`, `skill-audit`.
