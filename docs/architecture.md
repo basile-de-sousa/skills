@@ -23,6 +23,8 @@
 2. Pour chaque skill modifié : un commit `release: <nom>-<version>`.
 3. Au push sur `main`, la GitHub Action crée pour chaque commit de release le tag du même nom, construit `<nom>.zip` et l'attache à une Release. Pourquoi la CI et non la session : une session Claude ne peut pas pousser de tags. Le zip n'est jamais commité : un binaire n'a pas de diff.
 
+La copie sur disque suit claude.ai en quelques secondes, même en cours de session (vérifié le 2026-11-10 : skill enregistré à 22:07:03 UTC, présent sur disque à 22:07:07). Une release peut donc suivre une modification dans la même conversation ; c'est ce que fait le skill `skills-release`, qui propose la release après chaque modification acceptée.
+
 Aucun téléchargement manuel. Version : date de la release, `AAAA.MM.JJ` (suffixe `.2`, `.3` le même jour). Pourquoi : aucune décision humaine à chaque release ; le diff et la note de release disent ce qui change.
 
 La release part d'une session Claude et non d'une CI sur le repo du skill. Pourquoi : le texte du skill n'existe que sur claude.ai, qu'une CI ne peut pas lire ; seule une session en a la copie.
@@ -40,6 +42,3 @@ Le repo est public, sans licence (choix de Basile). Un skill entre dans `publish
 Publiés : `spec`, `trad`.
 En attente de paramétrage : `pin` d'abord, puis `sonar`, `buzzword`, `methodo`, `note`. La spec de ce travail vit dans le repo de chaque skill.
 Non publiés, par choix : `grill-me-solo`, `skill-audit`.
-
-## Open questions
-- **Fraîcheur du cache** : la copie sur disque date probablement du début de la session ; une release lancée juste après une modification dans la même conversation pourrait publier l'ancienne version. Réglé par : un test à la prochaine modification d'un skill.
