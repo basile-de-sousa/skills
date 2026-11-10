@@ -1,7 +1,8 @@
 #!/bin/sh
 # Copie les skills listés dans published.txt depuis le cache claude.ai de la session
 # vers skills/, puis crée un commit "release: <skill>-<version>" par skill modifié.
-# Les valeurs du bloc Config d'un skill sont masquées (voir mask_config).
+# Les valeurs du bloc Config d'un skill sont masquées (voir mask_config), et un skill
+# qui contient encore le nom du compte du repo de partage n'est pas publié (check_owner).
 # Le tag, le zip et la Release GitHub sont créés par la CI au push.
 # Usage : sh scripts/release.sh            (puis : git push)
 #   RELEASE_NOTE="pourquoi ce changement"  -> corps du commit, repris dans la Release GitHub
@@ -66,6 +67,25 @@ mask_config() {
   return "$leak"
 }
 
+# Nom du compte propriétaire du repo de partage : il ne doit apparaître dans aucun skill publié.
+OWNER=${RELEASE_OWNER:-}
+if [ -z "$OWNER" ]; then
+  url=$(git remote get-url origin 2>/dev/null || true)
+  OWNER=$(printf '%s' "$url" | sed -nE 's#^.*github\.com[:/]+([^/]+)/.*$#\1#p')
+fi
+if [ -z "$OWNER" ]; then
+  echo "Nom du compte inconnu (ni remote origin ni RELEASE_OWNER) : vérification du nom du compte sautée." >&2
+fi
+
+# Échoue si la copie publiée contient le nom du compte (après masquage du bloc Config).
+check_owner() {
+  [ -n "$OWNER" ] || return 0
+  if grep -rniF -- "$OWNER" "$1" >&2; then
+    echo "nom du compte « $OWNER » présent dans le skill : à déplacer dans son bloc Config" >&2
+    return 1
+  fi
+}
+
 # Remet skills/<nom> dans l'état du dernier commit (ou l'enlève s'il n'a jamais été publié).
 restore() {
   git reset -q HEAD -- "skills/$1" 2>/dev/null || true
@@ -79,7 +99,7 @@ while read -r name; do
     echo "Ignoré : $name absent du cache." >&2; continue
   fi
   rm -rf "skills/$name"; mkdir -p skills; cp -R "$SRC/$name" "skills/$name"
-  if ! mask_config "skills/$name"; then
+  if ! mask_config "skills/$name" || ! check_owner "skills/$name"; then
     echo "Non publié : $name (voir ci-dessus)." >&2
     restore "$name"; failed="$failed $name"; continue
   fi
