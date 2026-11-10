@@ -10,6 +10,7 @@ Docs de ce repo en tant que projet (le mécanisme de partage). Les docs de chaqu
 
 ## Specs
 - [001](specs/001-masquer-config-a-la-release.md) : masquer le bloc Config d'un skill à la release (done).
+- [002](specs/002-garde-fou-nom-du-compte.md) : refuser de publier un skill qui contient le nom du compte.
 
 ## Ajouts projet
 - **Scope** des ADR : `all`, `release`, `publication`.

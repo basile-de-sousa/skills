@@ -117,5 +117,48 @@ if [ "$RC" -eq 0 ] && cmp -s "$T/src/f/SKILL.md" skills/f/SKILL.md \
   ok "SPEC-001 AC4: l'absence de saut de ligne final est conservée"
 else fail "SPEC-001 AC4: l'absence de saut de ligne final est conservée"; fi
 
+run_as() { OUT=$(RELEASE_OWNER="$1" SKILLS_DIR="$T/src" sh scripts/release.sh 2>&1); RC=$?; }
+
+# SPEC-002 AC1 + AC3 : le nom du compte traîne dans le texte
+setup h
+skill h <<'S'
+# H
+Enregistrer dans https://github.com/Acme-Corp/data
+S
+run_as acme-corp
+if [ "$RC" -ne 0 ] && [ ! -e skills/h ] && [ "$(commits)" = 1 ] \
+   && printf '%s' "$OUT" | grep -q 'github.com/Acme-Corp/data'; then
+  ok "SPEC-002 AC1: nom du compte dans le texte, rien n'est publié et la ligne est montrée"
+  ok "SPEC-002 AC3: RELEASE_OWNER fixe le nom du compte"
+else
+  fail "SPEC-002 AC1: nom du compte dans le texte, rien n'est publié et la ligne est montrée"
+  fail "SPEC-002 AC3: RELEASE_OWNER fixe le nom du compte"
+fi
+
+# SPEC-002 AC2 : le nom du compte n'est que dans le bloc Config
+setup i
+skill i <<'S'
+# I
+<!-- config -->
+- Repo de données : `acme-corp/data`
+<!-- /config -->
+Enregistrer dans le repo de données.
+S
+run_as acme-corp
+if [ "$RC" -eq 0 ] && grep -q '`<à définir>`' skills/i/SKILL.md 2>/dev/null && ! grep -rqi acme-corp skills/i; then
+  ok "SPEC-002 AC2: nom du compte seulement dans le bloc Config, le skill est publié masqué"
+else fail "SPEC-002 AC2: nom du compte seulement dans le bloc Config, le skill est publié masqué"; fi
+
+# SPEC-002 AC4 : compte inconnu (ni remote ni RELEASE_OWNER)
+setup j
+skill j <<'S'
+# J
+Un skill quelconque.
+S
+run
+if [ "$RC" -eq 0 ] && [ -e skills/j/SKILL.md ] && printf '%s' "$OUT" | grep -qi 'compte'; then
+  ok "SPEC-002 AC4: compte inconnu, la vérification est signalée comme sautée"
+else fail "SPEC-002 AC4: compte inconnu, la vérification est signalée comme sautée"; fi
+
 [ "$fails" -eq 0 ] && echo "Tous les tests passent." || echo "$fails test(s) en échec."
 exit "$fails"
