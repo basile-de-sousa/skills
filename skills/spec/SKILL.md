@@ -160,7 +160,7 @@ When resuming a project in a new conversation, give only items 3 and 5, plus ope
 
 ## Running: `/spec run` (Claude Code only)
 
-All work happens on one branch: the current one, or one the run creates (`run/` or `autorun/`). No branch per spec. On the current branch, no pull request: the commits are the review and rollback unit. On a branch the run created, open a pull request at the end: work done unwatched then gets one diff to review and one button to merge.
+All work happens on one branch: the current one, or one the run creates (`run/` or `autorun/`). No branch per spec, except the short-lived branches of parallel specs, merged back into it (see Several specs). On the current branch, no pull request: the commits are the review and rollback unit. On a branch the run created, open a pull request at the end: work done unwatched then gets one diff to review and one button to merge.
 
 ### Start of the run
 
@@ -210,15 +210,19 @@ Judge by the cost of being wrong:
 
 ### Several specs (`all` or a list)
 
-- Run each spec in a fresh subagent, one after the other, to keep context and quota small. Its prompt: "Load the /spec skill. Run SPEC-NNN following its 'For each spec' section, on the current branch. Never ask the user: if blocked, apply the blocked rule and report." The orchestrator handles the start of the run and the end.
-- Never ask questions during the run; everything waiting for the user goes in the final report.
+- **One fresh subagent per spec**, to keep each context small. Its prompt: "Load the /spec skill. Run SPEC-NNN following its 'For each spec' section, on branch <branch>. Never ask the user: if blocked, apply the blocked rule and report." The orchestrator handles the start of the run, the merges and the end. Never ask questions during the run; everything waiting for the user goes in the final report.
+- **Independent specs run in parallel, 2 or 3 at once**: no `depends` between them, and no code they both reshape (same component, same engine function). Why: the run finishes sooner. Limits: in doubt, one after the other; a spec that depends on another or touches its code waits for its merge; parallel spends the same quota faster, so after a run that hit the usage limit, stay serial.
+- **One worktree and branch per parallel spec** (`<run-branch>-NNN`, from the run branch), in a folder the test runner and dev server ignore (e.g. `.claude/worktrees`; set that up first). Why: two agents in one tree corrupt each other's commits and test runs. Tell each agent which files the others are changing, so it keeps its edits there small. Agents never push to the run branch: the orchestrator's tree only receives merges.
+- **Merge as each one ends** (`--no-ff`: one merge commit per spec), then run the full checks and the consistency checks, and reread every current-truth section both sides changed. "Both added" is fine for a glossary, an index or a stylesheet; two rules for the same thing is a contradiction to resolve. Then start what the merge unblocks.
+- **Repo-wide checks** (visual audit, dev server, end-to-end tests) run once, by the orchestrator, after merges; agents describe the visual checks they need.
+- A parallel spec that fails: delete its worktree and branch, set the spec back to `draft` with the question.
 
 ### End of the run
 
 - Run the full test suite and checks once more, to catch regressions between specs.
 - Push the branch (on the default branch only if the user said yes at the start or the saved choice is `default`).
 - If the run created the branch, open a pull request into the default branch (not a draft), titled with what it holds ("Autorun 2026-11-08: 4 specs, 2 items for you"), with the report as its description. Merging it is the approval; closing it and deleting the branch undoes the run. No pull request without a GitHub remote or when the project's rules forbid it; without a tool to open one, put the report in the last commit message, so it stays with the branch.
-- Report in a few lines (the pull request description when there is one): branch, specs done with their commit range (`git log --oneline --grep "SPEC-NNN"`), specs sent back to `draft` with their question, proposed ADRs, suggestions worth a look. Add how to undo one spec: `git revert <first>^..<last>`.
+- Report in a few lines (the pull request description when there is one): branch, specs done with their commit range (`git log --oneline --grep "SPEC-NNN"`), specs sent back to `draft` with their question, proposed ADRs, suggestions worth a look. Add how to undo one spec: `git revert -m 1 <merge>` for a merged parallel spec, else `git revert <first>^..<last>`.
 
 ## Autorun: `/spec autorun` (Claude Code only)
 
@@ -237,11 +241,11 @@ The user is leaving (asleep, out) and wants the work to go on with no input. Eve
 
 ### While the user is away
 
-- **Order**: `ready` specs first (For each spec, a fresh subagent each), then fixes, then design within the brief. A spec you write here gets `by: autorun` in its frontmatter and may be `ready` on this branch: the brief approved it, the merge will confirm it. Tune a value only on evidence (a test, a simulation, a playtest note), never by taste.
+- **Order**: `ready` specs first (see Several specs), then fixes, then design within the brief. A spec you write here gets `by: autorun` in its frontmatter and may be `ready` on this branch: the brief approved it, the merge will confirm it. Tune a value only on evidence (a test, a simulation, a playtest note), never by taste.
 - **Off-limits**: anything that costs money, breaking changes (data formats, saves, public API), work beyond about a day, security-sensitive changes, removing a feature, product decisions outside the brief. Note it for the user and switch subject. Why: these cannot be undone by deleting a branch.
 - **Going in circles**: the same test still fails after three real attempts, or an item stops progressing. Pause, restate the problem and weigh the cost of going on; usually reset the item, write what you learned as an open question, and switch subject. If a skill describing the user's way of reasoning is available, load it for design choices and loops; otherwise go on without it.
 - **Stop** at the first of: the stop time, the brief's goal reached, nothing useful left in the brief, two items abandoned in a row. Usage limits can end the session at any moment: commit and push after every step so nothing is lost.
 
 ### For the user's return
 
-Run the full checks, push, open the pull request (see End of the run) and end with the report: what was done, per spec with its commits; what waits for the user (off-limits items, open questions, drafts, proposed ADRs); how to review: merge the pull request to keep it all, comment on it for a later session to fix, `git revert <first>^..<last>` to drop one spec, close it and delete the branch to drop the night.
+Run the full checks, push, open the pull request (see End of the run) and end with the report: what was done, per spec with its commits; what waits for the user (off-limits items, open questions, drafts, proposed ADRs); how to review: merge the pull request to keep it all, comment on it for a later session to fix, `git revert` to drop one spec (see End of the run), close it and delete the branch to drop the night.
