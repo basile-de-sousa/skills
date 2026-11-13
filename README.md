@@ -14,6 +14,7 @@ Mes skills pour Claude, versionnés.
 | [pin](skills/pin/SKILL.md) | Épingler un outil, site, techno, idée ou lecture avec un « utile quand », dans ton propre repo GitHub |
 | [buzzword](skills/buzzword/SKILL.md) | Fiche ultra-courte pour comprendre et expliquer à l'oral un terme de stratégie IT ou d'architecture SI |
 | [note](skills/note/SKILL.md) | Compiler des notes brutes en une page HTML épurée par sujet |
+| [sonar](skills/sonar/SKILL.md) | Retrouver ce que tu as déjà gardé (pins, buzzwords, notes, méthodes) quand tu démarres un sujet, avec pourquoi ça sert ou pas |
 | [skills-release](skills/skills-release/SKILL.md) | Publier la release d'un skill dans un repo de partage comme celui-ci (pars d'une copie de ce repo) |
 
 ## Installer un skill

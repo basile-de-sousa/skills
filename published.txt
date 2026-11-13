@@ -6,3 +6,4 @@ pin
 buzzword
 note
 skills-release
+sonar
