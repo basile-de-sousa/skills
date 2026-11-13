@@ -13,10 +13,12 @@ The user talks naturally; you apply this skill on your own. Say in one line when
 
 | Typed | What you do |
 |---|---|
-| `/spec` | Explain the workflow in a few lines: where truth lives, what you do automatically, the four lanes, the commands |
+| `/spec` | A short guide for someone new to it (see below) |
 | `/spec ?` | Status: where the project stands and what to do next. Same when asked in words ("where is the project?", "what should I do?") |
 | `/spec run [NNN ... or all]` | Claude Code only: implement `ready` specs. Without a number, list them and ask which. Without a code environment, say it needs Claude Code |
-| `/spec autorun` | Claude Code only: work alone while the user is away, on its own branch (see Autorun) |
+| `/spec autorun [vision]` | Claude Code only: design and build alone while the user is away, on its own branch (see Autorun) |
+
+**The `/spec` guide**: under ten lines, from the user's side, no internals. Start with `/spec ?`: it finds the repo, offers to set it up if needed, and says what to do next. Then talk about your project normally: decisions are recorded in the repo after a short recap and one yes. `/spec ?` shows where it stands and what to do next. `/spec run` builds the `ready` specs, tests first. `/spec autorun <vision and goals>` designs and builds alone while you are away; you review one pull request on return. Bugs and small tweaks you report are fixed at once; the rest becomes a spec. Give details only when asked.
 
 Everything else is automatic: starting or adopting a project (Init), design talk (Recording), feedback on what exists (Four lanes), discussing a draft or a proposed ADR (Review), resuming a project (short status).
 
@@ -139,7 +141,8 @@ In chat (no code), a fix or a tune becomes a short `ready` spec for `/spec run`.
 ## Status, init, review
 
 **Status** (`/spec ?`). Written for someone who has never seen the project. Compute it from the repo every time (frontmatter, ADR header lines, `## Open questions`, `git log`); never keep a status file. One line per item; lists longer than 5 show the first 5 and a count. In Claude Code, `git fetch` first (read-only); if the branch is behind its remote, or the remote default branch has `docs/` commits missing here, say so first with the command to get them.
-1. **Project**: the project line from CLAUDE.md and a link to `docs/README.md`. No current-truth docs: say so and recommend starting them.
+0. **Repo**: none open or identified: say so, ask which one (in chat, the GitHub connector can list the user's repos), and stop there.
+1. **Project**: the project line from CLAUDE.md and a link to `docs/README.md`. Not set up yet (no `docs/README.md` indexing current-truth docs, or a CLAUDE.md that does not describe this workflow): say so, show in three lines what Init would do in this repo (the docs it would write from the code, the CLAUDE.md lines it would add or change), offer it, and skip items 2 to 6.
 2. **Progress**: specs done out of total, the last 3 done with their date (from `docs: done SPEC-NNN` commits, else the last commit touching the spec).
 3. **Interrupted**: `in-progress` specs, with their last tagged commit and branch; they resume with `/spec run NNN`.
 4. **Next to run**: `ready` specs in run order, flagging unmet `depends`.
@@ -147,13 +150,13 @@ In chat (no code), a fix or a tune becomes a short `ready` spec for `/spec run`.
 6. **Consistency problems**, if any.
 7. **Next step**: what to do or type next, and why in 2-3 sentences.
 
-When resuming a project in a new conversation, give only items 3 and 5, plus open pull requests with unanswered comments, in three lines at most.
+When resuming a project in a new conversation, give only items 3 and 5, plus open pull requests with unanswered comments, in three lines at most. In a repo not set up yet, offer Init once instead.
 
 **Init** (a new project, or a repo without current-truth docs). Greenfield: discuss the product, the main principles and the stack, recommend where the user is unsure, then write the current-truth docs and `docs/README.md`; an ADR only for choices that meet the ADR bar. Brownfield: read the code structure, build files and existing docs, write current-truth docs describing what exists (flag what you inferred), and let the user correct them. Keep each doc short. In an existing repo, also:
 - Sort existing docs into current truth (index them), history (list them in `docs/README.md`) and obsolete (propose deletion); wait for the user's yes before moving or deleting anything.
 - Move rules in force out of ADRs and CLAUDE.md into current-truth docs, leaving a one-line link; project-specific doc rules go in `docs/README.md` as project additions.
 - Give every ADR its `Type` and `Scope` line (shown for the user's yes) and write the Scope list in `docs/README.md`.
-- Align the workflow rules of CLAUDE.md with this skill (current branch; a pull request only for branches a run creates; four lanes) unless the user wants to keep the project's own. If the repo mirrors CLAUDE.md for other agents (`AGENTS.md`), state the workflow there in plain words, since those agents do not have this skill.
+- Align the workflow rules of CLAUDE.md with this skill (current branch; a pull request only for branches a run creates; four lanes): keep everything project-specific (description, commands, conventions), add or adapt only the workflow lines, show the change and wait for the user's yes. Keep the project's own rules when the user prefers them. If the repo mirrors CLAUDE.md for other agents (`AGENTS.md`), state the workflow there in plain words, since those agents do not have this skill.
 - Write `scripts/check-docs.sh` (POSIX sh, no dependency) running the mechanical consistency checks, name it in CLAUDE.md, run it and fix what it reports.
 
 **Review** (the user discusses a draft or a proposed ADR). Take open questions one at a time: options plus a recommendation; record each answer as it is given. When none remain and the user approves, set `ready`. For a proposed ADR, summarize decision, alternatives, consequences and the code relying on it; accepted → `accepted` and update the current-truth doc it affects; rejected → `rejected`, a draft spec to change the code, and a new ADR if a different decision replaces it.
@@ -236,7 +239,7 @@ The user is leaving (asleep, out) and wants the work to go on with no input. Eve
    Either way, the session must approve actions on its own, or the run stalls at the first approval prompt: if you cannot tell, ask. That setting is the user's; you cannot change it.
 2. Clean working tree and sync, as in Start of the run.
 3. **Time away.** Ask until when the user is away. Stop a quarter of an hour before, to leave time for the final checks. The time sizes the plan: half an hour is a few fixes; five hours can carry a theme.
-4. **Brief.** Ask whether the user has five minutes.
+4. **Brief.** A vision given with the command (`/spec autorun <vision and goals>`) is the starting point: skip the five-minutes question, challenge it and propose the brief as below. Otherwise ask whether the user has five minutes.
    - Yes: the user gives a vision ("rework the UI into a polished game with a HUD and animations") or asks for yours (from the project vision, open questions and `ready` specs). Challenge it for the time available: risks, what is out of reach, a smaller version that fits. Then propose one brief: goal, in and out of scope, stop conditions. One yes.
    - No: the brief is `ready` specs and fixes only. Without a written vision or a brief from the user, never design new features.
 5. Create `autorun/YYYY-MM-DD` from the updated default branch (whatever `spec.runOn` says; a branch imposed by the platform replaces it, see Start of the run), record the brief in an empty commit `chore: autorun brief`, push. From here on, never ask anything.
