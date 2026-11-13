@@ -171,7 +171,8 @@ All work happens on one branch: the current one, or one the run creates (`run/` 
    - A requested spec missing here, or different on the remote default branch, while the current branch is another one: say so and ask, recommended first: **create `run/YYYY-MM-DD` from the updated default branch and continue**, or **stop**. Never copy a spec file alone from another branch: it may rely on docs changed with it. Without a user present, stop and report. With `all`, list in one line the `ready` specs that exist only on the remote, and continue.
 3. If the current branch has an open pull request with unanswered review comments, handle them first, each through the four lanes, and reply to each on the pull request.
 4. Run the consistency checks; stop on a problem that affects the specs to run.
-5. If the current branch is the default branch (or the one named in CLAUDE.md):
+5. **Branch imposed by the platform** (a cloud session that lets you push to one branch only): it takes the place of `run/...` or `autorun/...`; the brief and the pull request stay the same. Say so in one line. If that branch is the default branch, the next step applies as to any default branch; in autorun, stop at launch and say why.
+6. If the current branch is the default branch (or the one named in CLAUDE.md):
    - **Saved choice** (`git config --local spec.runOn`): `default` → commit and push on it; `run-branch` → create `run/YYYY-MM-DD` from here. Apply it without asking, and say so in one line with how to change it: `git config --local --unset spec.runOn`.
    - **No saved choice**: ask once with a clear warning, "No" first and recommended (the user can still answer "stop"):
      - **No - create `run/YYYY-MM-DD` from here and continue** (recommended)
@@ -179,7 +180,7 @@ All work happens on one branch: the current one, or one the run creates (`run/` 
      - **Yes - commit and push on <branch>**
      - **Yes - same, and remember for this project**
      "Remember" runs `git config --local spec.runOn run-branch` (or `default`): local to this clone, never pushed. Without a question tool or a user present, take the first option and save nothing.
-6. Order the specs: dependencies first, then by number. Skip any whose `depends` is not `done` and is not in this run.
+7. Order the specs: dependencies first, then by number. Skip any whose `depends` is not `done` and is not in this run.
 
 ### For each spec
 
@@ -194,8 +195,9 @@ All work happens on one branch: the current one, or one the run creates (`run/` 
 4. **Implement (green).** Write a short task list in `## Plan`; no approval needed, `ready` is the approval. Implement until the tests pass, refactor, commit per task (Conventional Commits, `(SPEC-NNN)` in every message). The tests from step 3 are locked: if one looks wrong, the spec is wrong, so it is blocked.
    - When a module folder is created or first touched and has no `CLAUDE.md`, add a short one pointing to its current-truth doc (what the module owns, link, local conventions).
 5. **Update the current truth.** Write the rules this spec put in force into the current-truth docs listed in `context` (or create the right doc and index it in `docs/README.md`). If `supersedes` is set, append `(superseded by SPEC-NNN)` to the replaced criterion in the earlier spec.
-6. **Verify.** Run the commands listed in CLAUDE.md. If they exist and the repo has no CI yet, add a minimal CI running them (`ci: ...` commit).
-7. **Close.** Tick the criteria, fill `## Implementation notes`, set `status: done`, commit `docs: done SPEC-NNN`.
+6. **Verify, at the right cost.** Fast checks (typecheck, unit tests) run in full for every spec: a regression is caught on its own commit, and undoing a spec stays a plain revert. Slow checks (browser, end-to-end, visual) run only on what the spec touches, then in full after each merge and at the end of the run, where cross effects show. While developing, only the related tests. Limits: if you cannot tell what a spec touches, run everything. A check that fails then passes on a rerun is flaky, not green: stabilize it (fix lane) or record it as an open question, and name it in the report.
+   - CLAUDE.md says which commands are slow and how to target them; if it does not, add that line (a docs commit) and mention it in the report. If the commands exist and the repo has no CI yet, add a minimal CI running the fast ones (`ci: ...` commit).
+7. **Close.** Tick the criteria, fill `## Implementation notes`, set `status: done`, and commit that alone as `docs: done SPEC-NNN`, even right after another docs commit: the status dates finished specs from this message.
 
 **The branch is never left broken.** If a spec cannot reach green or becomes blocked after its start commit, reset the branch to the commit before `docs: start SPEC-NNN` (only this run's unpushed commits), then set the spec back to `draft` with the question and commit that.
 
@@ -222,7 +224,7 @@ Judge by the cost of being wrong:
 - Run the full test suite and checks once more, to catch regressions between specs.
 - Push the branch (on the default branch only if the user said yes at the start or the saved choice is `default`).
 - If the run created the branch, open a pull request into the default branch (not a draft), titled with what it holds ("Autorun 2026-11-08: 4 specs, 2 items for you"), with the report as its description. Merging it is the approval; closing it and deleting the branch undoes the run. No pull request without a GitHub remote or when the project's rules forbid it; without a tool to open one, put the report in the last commit message, so it stays with the branch.
-- Report in a few lines (the pull request description when there is one): branch, specs done with their commit range (`git log --oneline --grep "SPEC-NNN"`), specs sent back to `draft` with their question, proposed ADRs, suggestions worth a look. Add how to undo one spec: `git revert -m 1 <merge>` for a merged parallel spec, else `git revert <first>^..<last>`.
+- Report in a few lines (the pull request description when there is one): branch, specs done with their commit range (`git log --oneline --grep "SPEC-NNN"`) and the slow checks each one ran, flaky checks found, specs sent back to `draft` with their question, proposed ADRs, suggestions worth a look. Add how to undo one spec: `git revert -m 1 <merge>` for a merged parallel spec, else `git revert <first>^..<last>`.
 
 ## Autorun: `/spec autorun` (Claude Code only)
 
@@ -237,7 +239,7 @@ The user is leaving (asleep, out) and wants the work to go on with no input. Eve
 4. **Brief.** Ask whether the user has five minutes.
    - Yes: the user gives a vision ("rework the UI into a polished game with a HUD and animations") or asks for yours (from the project vision, open questions and `ready` specs). Challenge it for the time available: risks, what is out of reach, a smaller version that fits. Then propose one brief: goal, in and out of scope, stop conditions. One yes.
    - No: the brief is `ready` specs and fixes only. Without a written vision or a brief from the user, never design new features.
-5. Create `autorun/YYYY-MM-DD` from the updated default branch (whatever `spec.runOn` says), record the brief in an empty commit `chore: autorun brief`, push. From here on, never ask anything.
+5. Create `autorun/YYYY-MM-DD` from the updated default branch (whatever `spec.runOn` says; a branch imposed by the platform replaces it, see Start of the run), record the brief in an empty commit `chore: autorun brief`, push. From here on, never ask anything.
 
 ### While the user is away
 
