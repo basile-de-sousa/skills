@@ -23,7 +23,7 @@ Objectif : quand l'utilisateur démarre un sujet ou un projet, lui ressortir ce 
 |---|---|
 | `/sonar` | **Aide** (voir plus bas), toujours, même en pleine discussion |
 | `/sonar ?` | **Sonder le sujet de la conversation** en cours (projet décrit, spec en cours, problème posé). Conversation sans sujet : l'aide |
-| `/sonar <sujet, projet ou question>` | Sonder ce sujet (`/sonar jeu 3D web`, `/sonar outil RH avec des données sensibles`) |
+| `/sonar <sujet, projet ou question>` | Sonder ce sujet (`/sonar jeu 3D web`, `/sonar outil RH avec des données sensibles`). Une demande pour **retrouver** une chose précise (`/sonar j'aimerais manger à Paris`) passe en **recherche rapide** (voir plus bas) |
 | `/sonar <sources> : <sujet>` | Sonder **uniquement** ces sources, pour cette recherche (`/sonar pins buzzwords : jeu 3D web`). Avec `?` : `/sonar pins : ?` |
 | `/sonar all : <sujet>` | Sonder **toutes** les sources, sans sélection automatique |
 
@@ -36,6 +36,7 @@ Réponse immédiate, **aucun outil** : expliquer le skill, pas l'état des stock
 ```
 **/sonar** : retrouver ce que tu as déjà gardé (pins, buzzwords, notes, méthodes) quand tu démarres un sujet.
 - `/sonar <sujet ou projet>` : ce qui peut servir, ce qu'il vaut mieux écarter
+- `/sonar <ce que tu cherches>` (« j'aimerais manger à Paris ») : recherche rapide dans tes pins
 - `/sonar ?` : je sonde le sujet de la conversation en cours
 - `/sonar pins notes : <sujet>` : seulement ces sources · `/sonar all : <sujet>` : toutes
 - Le bon moment : au **début** d'un projet ou d'une spec, avant de choisir tes outils
@@ -50,7 +51,7 @@ Chaque source est indépendante. Une source non configurée, absente, vide ou in
 | Pins | Repo des pins (Config) | `index.md` : une ligne par entrée avec type, **statut** (`noté`, `à creuser`, `exploré`), **avis** éventuel après `:`, « utile quand » et tags | `pins/<slug>.md` ou `pins/<slug>/README.md` ; le `dossier.md` d'une idée **seulement** si la requête nomme l'idée (ou son slug), ou si l'utilisateur dit vouloir avancer dessus ; pour annoncer le dossier, compter ses décisions et questions avec `grep -c` sans l'ouvrir |
 | Buzzwords | Repo des buzzwords (Config), dossier `buzzwords/` | frontmatter de chaque fiche : `term`, `acronym`, `aliases`, `tags`, `relations` | corps de la fiche ; lien `<Site des buzzwords>/<slug>/` |
 | Notes | artifacts dont le titre commence par `Notes · ` (`Artifact` list avec `limit: 200` : la liste par défaut s'arrête aux 25 plus récents) | titres des sujets | `read` du sujet, puis le JSON `#notes` : `overview`, titres et `id` des pages et des notions, glossaire |
-| Méthodes | Repo des méthodes (Config) | `index.md` : une ligne par méthode avec type, scope, **statut**, « utile quand » ; `observations.md` | `methodes/<slug>.md` |
+| Méthodes | Repo des méthodes (Config) | `index.md` : une ligne par méthode avec type, scope, **statut**, « utile quand », et sa section `## Domaines` (une ligne par dossier de domaine) ; `observations.md` | `methodes/<slug>.md`, ou `domaines/<domaine>/README.md` pour un dossier (principes du domaine et « quoi lire quand »). Une fiche du dossier **seulement** si la requête la nomme ou si le « quoi lire quand » du README la désigne pour ce contexte : au plus une |
 
 Une nouvelle source s'ajoute par une ligne dans ce tableau.
 
@@ -60,6 +61,7 @@ Sans filtre ni `all`, sonar **choisit** les sources qui peuvent répondre au con
 
 | Le contexte porte sur… | Sources |
 |---|---|
+| **retrouver une chose précise** : un lieu, un lien, une vidéo ou un post enregistré, « où j'avais noté… » | pins seulement : **recherche rapide** (voir plus bas) |
 | un choix d'outil, de techno, une idée, un projet à lancer | pins, buzzwords, + notes si un sujet de cours y touche |
 | comprendre ou expliquer une notion | buzzwords, notes, + pins |
 | une façon de faire : s'organiser, présenter, décider, débloquer | methodo, + pins |
@@ -69,9 +71,29 @@ Sans filtre ni `all`, sonar **choisit** les sources qui peuvent répondre au con
 - Les **notes** sont la source la plus coûteuse : lister les titres est rapide, n'ouvrir un sujet que si son titre colle.
 - Les sources non sondées sont **toujours nommées** dans la dernière ligne, avec la raison, pour que l'utilisateur puisse relancer avec `all` ou un filtre.
 
+### Recherche rapide
+
+Pour **retrouver**, pas pour analyser. But : répondre en quelques secondes.
+
+1. Élargir la requête (synonymes, français et anglais : « manger » → resto, restaurant, food, brunch, cuisine), puis `git clone --depth 1` (ou `git pull`) du repo des pins.
+2. **Un seul `grep`** sur tout le contenu des pins (`grep -rniE '<termes>' pins index.md`), sans ouvrir les fichiers un par un : il renvoie directement les lignes qui portent le nom, l'adresse ou le lien. Pour les pins trouvés, récupérer aussi leurs vidéos en une commande (`grep -H '^videos:' <fichiers trouvés>`).
+3. Répondre en **liste brute** : une ligne par élément trouvé, avec ce que la ligne contient d'utile (nom, lieu, lien), **le lien direct vers la vidéo ou le post d'origine** quand le pin en a un (champ `videos:` ou `url:`), puis le lien vers son pin. Pas d'étoiles, pas de « en quoi ça sert », pas de section À écarter.
+
+```
+- **<Nom du lieu>** · <quartier> · [Reel ↗](<url de videos:>) · dans [<Titre du pin>](…/pins/<slug>.md)
+- [TikTok ↗](<url de videos:>) · [<Autre pin>](…/pins/<slug>.md) · vidéo pas encore lue
+
+_Pins seulement. /sonar all : manger à Paris pour tout sonder._
+```
+
+- **Le lien vers la vidéo passe avant le lien du pin** : c'est souvent ce que l'utilisateur veut rouvrir. Libellé court selon la plateforme (`TikTok ↗`, `Reel ↗`, `YouTube ↗`, `vidéo ↗` sinon), un par URL de `videos:`.
+- Un pin trouvé dont le contenu ne dit rien d'utile (vidéo non lue ou illisible) : le citer quand même, avec son état et le lien vers sa vidéo.
+- Rien trouvé : `Rien dans tes pins sur « … ». /sonar all : … pour tout sonder.`
+- Doute entre retrouver et comprendre : recherche rapide, la ligne de fin permet d'élargir.
+
 ## Recherche
 
-Vite et léger : le coût dépend du nombre de fichiers ouverts, pas du nombre de sources.
+Recherche complète (tout sauf « retrouver »). Vite et léger : le coût dépend du nombre de fichiers ouverts, pas du nombre de sources.
 
 1. **Formuler le contexte** en une ligne : ce que l'utilisateur fait et ce dont il a besoin (« jeu 3D web, beaucoup d'entités à l'écran »). Avec `/sonar ?`, c'est la synthèse de la conversation. Puis **choisir les sources** (voir plus haut), sauf filtre ou `all`. Tout le jugement de pertinence se fait par rapport à cette ligne.
 2. **Élargir la requête** : synonymes, acronymes, technos et notions voisines, en français et en anglais (« jeu 3D web » → WebGL, WebGPU, Three.js, game, rendu, GPU). La recherche lexicale seule rate trop de choses.
@@ -106,8 +128,8 @@ _Non sondé : methodo (sans rapport). Notes : aucun sujet sur la 3D ou le jeu._
 - **Contexte** : toujours en première ligne, une phrase. Elle montre sur quoi sonar a cherché ; l'utilisateur corrige si c'est à côté.
 - **Pertinence** : ★★★ sert directement · ★★ utile en appui · ★ pour comprendre ou en marge. Classer du plus au moins pertinent.
 - Par résultat : une ligne de titre (**nom** · source et type · étoiles · lien), puis **1 à 3 puces** qui disent **en quoi ça sert ici**, jamais la définition générale.
-- Lien : `https://github.com/<Repo des pins>/blob/main/pins/<slug>.md` (ou `…/<slug>/README.md`, plus `· [dossier ↗](…/<slug>/dossier.md)` pour une idée en dossier) pour un pin, `<Site des buzzwords>/<slug>/` pour un buzzword (sans site : le fichier dans son repo), `https://github.com/<Repo des méthodes>/blob/main/methodes/<slug>.md` pour une méthode, `<url du sujet>#<id de la page>` pour une note (titre affiché : `Notes · X > page`), qui ouvre directement le bon onglet.
-- **Méthodes** : une méthode dit **comment** l'utilisateur travaille ; les puces disent comment l'appliquer à ce contexte, pas ce qu'elle est. Statut `confirmé` : rien de plus. `observation` : puce **Observation** (pas encore validée). `contesté` : puce **Contestée**. `déprécié` : dans **À écarter**, avec sa raison. Une observation de `observations.md` qui colle au contexte : une ligne en ★, `observation · méthodo`.
+- Lien : pour un pin qui a des `videos:` (ou une `url:`), d'abord le lien direct vers la vidéo ou le post (`[TikTok ↗](…)`), puis `https://github.com/<Repo des pins>/blob/main/pins/<slug>.md` (ou `…/<slug>/README.md`, plus `· [dossier ↗](…/<slug>/dossier.md)` pour une idée en dossier) pour un pin, `<Site des buzzwords>/<slug>/` pour un buzzword (sans site : le fichier dans son repo), `https://github.com/<Repo des méthodes>/blob/main/methodes/<slug>.md` pour une méthode, `…/domaines/<domaine>/README.md` pour un dossier de domaine, `<url du sujet>#<id de la page>` pour une note (titre affiché : `Notes · X > page`), qui ouvre directement le bon onglet.
+- **Méthodes** : une méthode dit **comment** l'utilisateur travaille ; les puces disent comment l'appliquer à ce contexte, pas ce qu'elle est. Statut `confirmé` : rien de plus. `observation` : puce **Observation** (pas encore validée). `contesté` : puce **Contestée**. `déprécié` : dans **À écarter**, avec sa raison. Une observation de `observations.md` qui colle au contexte : une ligne en ★, `observation · méthodo`. Un **dossier de domaine** qui colle (le contexte est un projet de ce domaine) : `dossier · méthodo`, souvent ★★★, avec les 1 à 3 principes du README qui s'appliquent ici.
 - **Statut et avis des pins** :
   - `noté`, ou `exploré` sans avis : rien de plus à signaler.
   - `à creuser` en ★★★ ou ★★ : une puce **À creuser**, avec l'avis s'il y en a un (la question que l'utilisateur se posait).
