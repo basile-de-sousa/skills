@@ -73,21 +73,27 @@ Sans filtre ni `all`, sonar **choisit** les sources qui peuvent répondre au con
 
 ### Recherche rapide
 
-Pour **retrouver**, pas pour analyser. But : répondre en quelques secondes.
+Pour **retrouver** une chose gardée. La vitesse vient du **périmètre** (les pins seulement), pas d'un jugement allégé : le jugement sur le sens reste.
 
 1. Élargir la requête (synonymes, français et anglais : « manger » → resto, restaurant, food, brunch, cuisine), puis `git clone --depth 1` (ou `git pull`) du repo des pins.
-2. **Un seul `grep`** sur tout le contenu des pins (`grep -rniE '<termes>' pins index.md`), sans ouvrir les fichiers un par un : il renvoie directement les lignes qui portent le nom, l'adresse ou le lien. Pour les pins trouvés, récupérer aussi leurs vidéos en une commande (`grep -H '^videos:' <fichiers trouvés>`).
-3. Répondre en **liste brute** : une ligne par élément trouvé, avec ce que la ligne contient d'utile (nom, lieu, lien), **le lien direct vers la vidéo ou le post d'origine** quand le pin en a un (champ `videos:` ou `url:`), puis le lien vers son pin. Pas d'étoiles, pas de « en quoi ça sert », pas de section À écarter.
+2. **Lire `index.md` en entier** et juger sur le sens : un pin peut répondre sans contenir les mots cherchés (« activités » → un pin `#sorties` sur les films).
+3. **Un seul `grep`** sur le contenu des pins (`grep -rniE '<termes>' pins`) : il ramène les détails que l'index n'a pas (nom d'un lieu, adresse, date). Pour les pins retenus, leurs vidéos en une commande (`grep -H '^videos:' <fichiers>`). Ne pas ouvrir les fichiers un par un.
+4. Répondre dans le format de la section Réponse, **en plus court** : étoiles, au plus une puce par résultat (ce qui sert ici : le lieu, la date, le prix), et **le lien direct vers la vidéo ou le post d'origine avant le lien du pin**. Un pin qui regroupe plusieurs éléments (repérages) : un résultat par élément utile. Pas de section À écarter, sauf avis « écarté » d'un pin trouvé.
 
 ```
-- **<Nom du lieu>** · <quartier> · [Reel ↗](<url de videos:>) · dans [<Titre du pin>](…/pins/<slug>.md)
-- [TikTok ↗](<url de videos:>) · [<Autre pin>](…/pins/<slug>.md) · vidéo pas encore lue
+**Contexte** : une activité à faire à Paris.
 
-_Pins seulement. /sonar all : manger à Paris pour tout sonder._
+**<Nom de l'expo>** · <lieu> · ★★★ · [Reel ↗](<url de videos:>) · [pin ↗](…/pins/<slug>.md)
+- Jusqu'au **<date de fin>**, <prix>.
+
+**Films à voir** · pin lecture · ★ · [pin ↗](…/pins/<slug>.md)
+- Une sortie **ciné** si rien d'autre ne tente.
+
+_Pins seulement. /sonar all : activités paris pour tout sonder._
 ```
 
-- **Le lien vers la vidéo passe avant le lien du pin** : c'est souvent ce que l'utilisateur veut rouvrir. Libellé court selon la plateforme (`TikTok ↗`, `Reel ↗`, `YouTube ↗`, `vidéo ↗` sinon), un par URL de `videos:`.
-- Un pin trouvé dont le contenu ne dit rien d'utile (vidéo non lue ou illisible) : le citer quand même, avec son état et le lien vers sa vidéo.
+- Libellé du lien vidéo selon la plateforme (`TikTok ↗`, `Reel ↗`, `YouTube ↗`, `vidéo ↗` sinon), un par URL de `videos:`.
+- Un pin retenu dont le contenu ne dit rien d'utile (vidéo non lue ou illisible) : le citer quand même, avec son état et le lien vers sa vidéo.
 - Rien trouvé : `Rien dans tes pins sur « … ». /sonar all : … pour tout sonder.`
 - Doute entre retrouver et comprendre : recherche rapide, la ligne de fin permet d'élargir.
 
