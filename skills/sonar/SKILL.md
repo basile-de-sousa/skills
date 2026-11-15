@@ -62,7 +62,7 @@ Sans filtre ni `all`, sonar **choisit** les sources qui peuvent répondre au con
 | Le contexte porte sur… | Sources |
 |---|---|
 | **retrouver une chose précise** : un lieu, un lien, une vidéo ou un post enregistré, « où j'avais noté… » | pins seulement : **recherche rapide** (voir plus bas) |
-| un choix d'outil, de techno, une idée, un projet à lancer | pins, buzzwords, + notes si un sujet de cours y touche |
+| un choix d'outil, de techno, une idée, un projet à lancer | pins, buzzwords, methodo (dossier du domaine surtout), + notes si un sujet de cours y touche |
 | comprendre ou expliquer une notion | buzzwords, notes, + pins |
 | une façon de faire : s'organiser, présenter, décider, débloquer | methodo, + pins |
 | un cours, un examen, un sujet académique | notes, buzzwords |
@@ -122,14 +122,14 @@ Style fiche buzzword : épuré, puces courtes, **2 à 3 mots-clés en gras** par
 **À écarter**
 - **wllama** · pin outil : tu l'as écarté, **trop lent sur CPU**.
 
-_Non sondé : methodo (sans rapport). Notes : aucun sujet sur la 3D ou le jeu._
+_Methodo : aucun dossier ni méthode sur le sujet. Notes : aucun sujet sur la 3D ou le jeu._
 ```
 
 - **Contexte** : toujours en première ligne, une phrase. Elle montre sur quoi sonar a cherché ; l'utilisateur corrige si c'est à côté.
 - **Pertinence** : ★★★ sert directement · ★★ utile en appui · ★ pour comprendre ou en marge. Classer du plus au moins pertinent.
 - Par résultat : une ligne de titre (**nom** · source et type · étoiles · lien), puis **1 à 3 puces** qui disent **en quoi ça sert ici**, jamais la définition générale.
 - Lien : pour un pin qui a des `videos:` (ou une `url:`), d'abord le lien direct vers la vidéo ou le post (`[TikTok ↗](…)`), puis `https://github.com/<Repo des pins>/blob/main/pins/<slug>.md` (ou `…/<slug>/README.md`, plus `· [dossier ↗](…/<slug>/dossier.md)` pour une idée en dossier) pour un pin, `<Site des buzzwords>/<slug>/` pour un buzzword (sans site : le fichier dans son repo), `https://github.com/<Repo des méthodes>/blob/main/methodes/<slug>.md` pour une méthode, `…/domaines/<domaine>/README.md` pour un dossier de domaine, `<url du sujet>#<id de la page>` pour une note (titre affiché : `Notes · X > page`), qui ouvre directement le bon onglet.
-- **Méthodes** : une méthode dit **comment** l'utilisateur travaille ; les puces disent comment l'appliquer à ce contexte, pas ce qu'elle est. Statut `confirmé` : rien de plus. `observation` : puce **Observation** (pas encore validée). `contesté` : puce **Contestée**. `déprécié` : dans **À écarter**, avec sa raison. Une observation de `observations.md` qui colle au contexte : une ligne en ★, `observation · méthodo`. Un **dossier de domaine** qui colle (le contexte est un projet de ce domaine) : `dossier · méthodo`, souvent ★★★, avec les 1 à 3 principes du README qui s'appliquent ici.
+- **Méthodes** : une méthode dit **comment** l'utilisateur travaille ; les puces disent comment l'appliquer à ce contexte, pas ce qu'elle est. Statut `confirmé` : rien de plus. `observation` : puce **Observation** (pas encore validée). `contesté` : puce **Contestée**. `déprécié` : dans **À écarter**, avec sa raison. Une observation de `observations.md` qui colle au contexte : une ligne en ★, `observation · méthodo`. Un **dossier de domaine** qui colle (le contexte est un projet de ce domaine) : `dossier · méthodo`, souvent ★★★, avec les 1 à 3 principes du README qui s'appliquent ici. En ★★★, ajouter une puce **À appliquer** : `/methodo <domaine>` avant de concevoir, pour charger le savoir-faire du domaine (sonar signale, il ne l'applique pas).
 - **Statut et avis des pins** :
   - `noté`, ou `exploré` sans avis : rien de plus à signaler.
   - `à creuser` en ★★★ ou ★★ : une puce **À creuser**, avec l'avis s'il y en a un (la question que l'utilisateur se posait).
