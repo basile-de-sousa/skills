@@ -1,6 +1,6 @@
 ---
 name: "pin"
-description: "Épingler un outil, site, techno, idée ou lecture avec un « utile quand » pour le retrouver au bon moment. Utiliser sur /pin (avec une url, un nom ou un texte) ou « pin ça »."
+description: "Épingler un outil, site, techno, idée ou lecture avec un « utile quand » pour le retrouver au bon moment. Utiliser sur /pin (seul : l'aide ; avec une url, un nom ou un texte), /pin ? ou « pin ça »."
 ---
 
 # Pin
@@ -8,21 +8,24 @@ description: "Épingler un outil, site, techno, idée ou lecture avec un « util
 ## Config
 <!-- config -->
 - Repo de données : `<à définir>`
+- Repo de watcher : `<à définir>`
 <!-- /config -->
 
 Le **repo de données** est le repo GitHub où vivent les pins ; dans les liens ci-dessous, `<repo>` désigne sa valeur. Si elle vaut `<à définir>`, demander à l'utilisateur son repo (`compte/nom`) avant toute autre action, puis proposer une modification de ce skill qui l'inscrit dans le bloc Config. Pourquoi : un skill n'a pas de mémoire propre, ce bloc est le seul endroit qui tient d'une conversation à l'autre. Il ne contient jamais de secret (jeton, mot de passe).
+
+Le **repo de watcher** est le repo GitHub de la commande watcher (voir « Vidéos »), où vit sa documentation. S'il vaut `<à définir>`, rien n'est bloqué : dire seulement que la documentation de l'archive se trouve dans le repo de watcher, sans demander sa valeur.
 
 Objectif : garder une trace de ce que l'utilisateur croise (outil, site, techno, idée, lecture) avec **quand ça lui servira**, pour qu'une recherche (par exemple `/sonar`) le ressorte au bon moment.
 
 La capture doit être **rapide** : aucune recherche nouvelle (pas de web, pas d'approfondissement). Ce qui a déjà été dit dans la conversation peut être gardé, mais **trié** : un pin n'est pas une note de cours. Il garde l'essentiel et les choix structurants, pas tout ce qui a été discuté.
 
-Un pin **vit** : il reflète l'état actuel de ce que l'utilisateur sait et pense. Approfondir un pin, c'est simplement en discuter dans une conversation, puis lancer `/pin` : le skill met à jour le contenu et le statut.
+Un pin **vit** : il reflète l'état actuel de ce que l'utilisateur sait et pense. Approfondir un pin, c'est simplement en discuter dans une conversation, puis lancer `/pin ?` (ou « pin ça ») : le skill met à jour le contenu et le statut.
 
 Une idée qui a mûri garde sa matière dans un **dossier** (voir « Dossier d'une idée ») : la fiche reste courte, le dossier n'est lu que pour approfondir.
 
 Un **abandon est un contexte daté, pas une interdiction** : il garde sa raison et ce qui le rouvrirait, pour qu'un futur modèle ou une situation nouvelle puisse le réévaluer au lieu de le subir.
 
-Une **vidéo** épinglée garde ce qu'elle apprend, pas seulement son lien : `/pin` la lit avec **watcher** quand cette commande est présente (voir « Vidéos »). Lire la vidéo n'est pas une recherche nouvelle, c'est l'objet même qu'on épingle. Sans watcher, `/pin` fonctionne comme avant.
+Une **vidéo** épinglée garde ce qu'elle apprend, pas seulement son lien : `/pin` la lit avec **watcher** quand cette commande est présente (voir « Vidéos »). Lire la vidéo n'est pas une recherche nouvelle, c'est l'objet même qu'on épingle. watcher en garde aussi la **matière brute** (vidéo, transcript, images) dans une archive sur Google Drive, pour y revenir plus tard (voir « Approfondir avec la matière d'une vidéo »). Sans watcher, `/pin` fonctionne comme avant.
 
 Un pin n'est **pas une tâche** : une chose à faire avec une échéance (corriger une faille, rendre un devoir) va dans un gestionnaire de tâches. Ce qu'on apprend en la réalisant, lui, peut être épinglé.
 
@@ -33,10 +36,11 @@ Un pin n'est **pas une tâche** : une chose à faire avec une échéance (corrig
 | `/pin <url, nom ou texte libre> [contexte]` | Créer l'entrée (statut `noté`) ou mettre à jour une entrée existante, et l'enregistrer immédiatement |
 | `/pin <X> ? [ce que je veux savoir]` | Passer X en **`à creuser`** (le créer s'il n'existe pas) |
 | `/pin <X> ! [verdict]` | Passer X en **`exploré`**, avec son verdict (utilisé dans tel projet, écarté pour telle raison, à garder pour…) |
-| `/pin <X> vidéos [--frames]` | **Lire les vidéos non lues** de X avec watcher et compléter sa section `## Vidéos` |
-| `/pin ?` | **État des lieux** : pins à creuser, récemment explorés, et suggestions (voir plus bas) |
-| `/pin` ou « pin ça » **après une discussion** | **Bilan de la conversation** : nouveaux éléments à épingler **et** pins existants à mettre à jour (voir plus bas) |
-| `/pin` **sans rien à épingler ni à mettre à jour** | Aide (voir plus bas) |
+| `/pin vidéos [--frames]` | **Traiter toutes les vidéos en attente**, tous pins confondus : lire celles qui ne le sont pas, archiver celles qui ne le sont pas, compléter chaque section `## Vidéos`. Aussi « /pin all videos », « lis et archive mes vidéos » |
+| `/pin <X> vidéos [--frames]` | Pareil, pour le seul pin X |
+| « dans les vidéos de X, … » | **Approfondir** avec la matière d'une vidéo : citation exacte, image, détail (voir plus bas) |
+| `/pin ?` ou « pin ça » | **Où j'en suis** : d'abord le **bilan de la conversation** s'il y a eu une discussion (nouveaux éléments à épingler **et** pins à mettre à jour, enregistrés après ton « ok »), puis l'**état des lieux** (à creuser, explorés récemment, suggestions, vidéos en attente). Voir plus bas |
+| `/pin` **seul** (aussi `/pin aide`, `/pin help`) | **Aide**, toujours, même après une discussion (voir plus bas) |
 
 Les formulations naturelles marchent aussi (« /pin WebGPU je veux m'y pencher », « /pin wllama écarté, trop lent ») : `?` et `!` ne sont que des raccourcis.
 
@@ -48,10 +52,10 @@ Réponse immédiate, **aucun outil** : expliquer le skill, pas l'état du repo.
 **/pin** : garder un outil, un site, une techno ou une idée avec **quand ça te servira**.
 - `/pin <url ou nom> [contexte]` : épingler (le contexte suffit, je remplis le reste)
 - `/pin X ?` : à creuser · `/pin X !` : exploré (ajoute ton verdict si tu veux)
-- `/pin X vidéos` : lire les vidéos de X (sur ton PC, avec watcher)
-- `/pin ?` : ce qui est à creuser, ce que tu as exploré récemment, et ce qui mériterait de l'être
-- `/pin` en fin de discussion : j'épingle le nouveau et je mets à jour le reste
-- Pour retrouver : `/sonar <sujet>`
+- `/pin vidéos` : lire et archiver sur ton Drive **toutes** les vidéos en attente (sur ton PC, avec watcher) ; `/pin X vidéos` pour un seul pin
+- « dans les vidéos de X, retrouve la phrase sur… » : je vais chercher dans l'archive
+- `/pin ?` (ou « pin ça ») : où tu en es. Après une discussion, je propose d'abord ce qu'il faut épingler ou mettre à jour ; puis ce qui est à creuser, exploré récemment, à reprendre, et les vidéos en attente
+- Pour retrouver : `/sonar <sujet>` · cette aide : `/pin`
 ```
 
 Ajouter **une seule ligne de conseil** si la conversation en donne l'occasion (par exemple un outil mentionné plus haut sans être épinglé : `À garder ? /pin Three.js`). Sinon, rien de plus.
@@ -76,7 +80,17 @@ Ajouter **une seule ligne de conseil** si la conversation en donne l'occasion (p
 
 **Suggérer `à creuser`, sans le poser** : à la création d'une **idée**, la confirmation ajoute `À creuser ? /pin <slug> ?`. Un oui d'un mot suffit ; sans réponse, l'idée reste `noté`.
 
-## État des lieux : `/pin ?`
+## Où j'en suis : `/pin ?` ou « pin ça »
+
+Deux parties, dans cet ordre, en une seule réponse :
+
+1. **Bilan de la conversation** (section suivante), seulement si la conversation a abordé des sujets à épingler ou des pins existants. Conversation vide, ou rien à proposer : sauter cette partie sans le dire.
+2. **État des lieux**, ci-dessous, toujours. Un pin déjà proposé dans le bilan n'y est pas répété.
+
+La réponse se termine par la question de validation du bilan s'il y en a un (`Je les enregistre ?`) ; l'état des lieux, lui, ne modifie rien.
+
+### État des lieux
+
 
 Lire `index.md` (type, statut et avis y figurent), puis en local, sans ouvrir les fichiers un par un : `grep -H '^status-since' -r pins` pour les durées, `grep -H '^links' -r pins` pour les liens, et `grep -H '^videos:' -r pins` pour les vidéos. Répondre :
 
@@ -93,7 +107,7 @@ Lire `index.md` (type, statut et avis y figurent), puis en local, sans ouvrir le
 
 ⚠ À creuser depuis plus d'un mois : **WebGPU**. Toujours d'actualité ?
 
-🎬 **Vidéos** · 5 pas encore lues (3 pins) → sur ton PC : `/pin <slug> vidéos`
+🎬 **Vidéos** · 5 à lire, 2 à archiver (4 pins) → sur ton PC : `/pin vidéos`
 - [**Montage vidéo avec Claude**](…) · 3 non lues · à creuser
 ```
 
@@ -101,9 +115,9 @@ Lire `index.md` (type, statut et avis y figurent), puis en local, sans ouvrir le
 - **À creuser ?** : **au plus 3** pins `noté` qui mériteraient de l'être, chacun avec la raison en quelques mots. Priorité : les **idées** de l'utilisateur (une idée jamais reprise se perd), puis un pin dont dépendent plusieurs autres (`links`), puis ceux liés à un pin `à creuser` ou au sujet de la conversation en cours. Jamais une suggestion sans lien avec ce qui occupe l'utilisateur. Ne suggérer que ce qui a une vraie raison ; sinon, omettre la section.
 - Section vide : l'omettre. Tout vide : `Rien à creuser, rien d'exploré récemment.`
 - La ligne ⚠ n'apparaît que s'il y a des entrées concernées ; si l'utilisateur répond non, repasser l'entrée en `noté`.
-- **Vidéos** (état **déduit**, jamais stocké ; `pin ?` signale, il ne lit rien) : une URL de `videos:` **non lue** n'a aucun bloc dans la section `## Vidéos` de son pin (`grep -F '<url>'` dans le fichier). Un bloc « illisible » compte comme traité. Afficher le **nombre** de vidéos non lues et de pins concernés, puis au plus 3 pins en liste, ceux `à creuser` d'abord. Aucune vidéo non lue : ne pas parler des vidéos.
+- **Vidéos** (état **déduit**, jamais stocké ; `pin ?` signale, il ne lit rien) : une URL de `videos:` **non lue** n'a aucun bloc dans la section `## Vidéos` de son pin (`grep -F '<url>'` dans le fichier) ; une vidéo **non archivée** a un bloc lu sans ligne `archive:`. Un bloc « illisible » compte comme traité. Afficher le **nombre** de vidéos à lire et à archiver et de pins concernés, puis au plus 3 pins en liste, ceux `à creuser` d'abord. Rien en attente : ne pas parler des vidéos.
 
-## Bilan de conversation : `/pin` après une discussion
+## Bilan de conversation (première partie de `/pin ?`)
 
 1. **Lire `index.md`** (cloner ou `git pull` le repo).
 2. **Repérer les pins concernés** par la conversation :
@@ -125,24 +139,31 @@ Lire `index.md` (type, statut et avis y figurent), puis en local, sans ouvrir le
 - **wllama** · voisin : retenu comme repli sans WebGPU du chat local
 ```
 
-Rien à épingler ni à mettre à jour : l'aide.
+Rien à épingler ni à mettre à jour : pas de bilan, seulement l'état des lieux.
 
 ## Vidéos
 
-**watcher** est une commande locale (sur le PC de l'utilisateur) qui sort, sans token, les métadonnées et le transcript d'une vidéo, et des planches d'images avec `--frames`. Elle ne garde rien et ne connaît pas les pins. Interface garantie : `watcher <url>`, `watcher --meta <url>` (métadonnées seules, rien de téléchargé), `watcher --frames <url>` ; code retour `0` réussi, `1` échec, `2` non supporté. Ne pas dépendre du format exact de sa sortie : la lire comme un texte.
+**watcher** est une commande locale (sur le PC de l'utilisateur) qui sort, sans token, les métadonnées et le transcript d'une vidéo, et des planches d'images avec `--frames`. Elle ne garde rien en local et ne connaît pas les pins. Avec `--keep`, elle copie le dossier de la vidéo dans une **archive sur Google Drive** (dossier `pins-videos`, un sous-dossier `<plateforme>-<id>` par vidéo, avec un `README.md` qui décrit chaque fichier). Interface garantie : `watcher <url>`, `watcher --meta <url>` (métadonnées seules, rien de téléchargé), `watcher --frames <url>`, `watcher --keep [--frames] <url>` (lecture, puis une ligne `archive: <clé> (<utilisé> sur <plafond>)` ou `archive: échec (<raison>)`), `watcher --restore <clé>` (remet le dossier archivé sur le PC et affiche son chemin) ; code retour `0` réussi, `1` échec, `2` non supporté. Ne pas dépendre du format exact de sa sortie : la lire comme un texte.
+
+Tout le reste de l'archive (mise en place, plafond de 20 Go, couper l'accès, accès expiré, nouvelle machine) est documenté dans le **repo de watcher** (bloc Config), `docs/architecture.md#archive` : y renvoyer l'utilisateur, ou le lire, dès qu'il pose une question sur l'archive ou sur son accès à Drive.
 
 **Présente ?** `command -v watcher` dans le shell de la session. Absente (session cloud, téléphone, commande non installée) : **aucune erreur, aucun message**, on ne lit pas les vidéos.
 
 **Quand lire** :
 - **À la capture** d'un lien vidéo (`/pin <url>`), si watcher est présente : lire, puis écrire le pin en connaissance de cause (corps et « utile quand » nourris par la vidéo).
-- **Plus tard, sur demande explicite pour ce pin** : `/pin <X> vidéos`, ou « lis les vidéos de X ». Ne lire que les URL non lues. Jamais par effet de bord d'une autre commande (bilan, `?`, `!`, mise à jour).
+- **Plus tard, sur demande explicite** : `/pin vidéos` (tous les pins) ou `/pin <X> vidéos` (un seul). Traiter les vidéos **en attente** : non lues (lire avec `--keep`) et lues sans ligne `archive:` (`watcher --keep <url>`, puis ajouter la ligne `archive:` sans réécrire le reste du bloc ; vidéo disparue depuis : le dire, ne rien changer). Jamais par effet de bord d'une autre commande (bilan, `?`, `!`, mise à jour).
+- **Toutes à la fois** : d'abord `watcher --meta` sur les vidéos à lire, puis **une seule question** pour toutes celles de plus de ~20 min (`2 vidéos longues : 48 min et 31 min. Les lire aussi ?`), puis le reste sans s'arrêter. Un seul commit pour l'ensemble, et une confirmation qui regroupe par pin.
+- **En parallèle** (Claude Code) : lancer les `watcher --keep` **3 par 3**, en plusieurs appels Bash dans le même message (chaque vidéo a son dossier, aucun conflit ; au-delà de 3, la transcription se dispute le processeur et l'envoi Drive le réseau). **Plus de 6 vidéos** : confier chaque pin à un sous-agent (outil Agent), avec ce skill et la liste de ses URL ; il lance watcher, lit, écrit la section `## Vidéos` de **son seul** fichier et rend une ligne de résumé, sans commit. Les transcripts et les images restent dans son contexte, pas dans le tien. Au plus 3 sous-agents à la fois ; à la fin, relire les fichiers modifiés (`git diff --stat`), faire le commit unique et la confirmation.
 - Demande explicite sans watcher : une ligne, `watcher introuvable ici : relance depuis ton PC (Claude Code dans WSL).`
 
 **Comment lire une vidéo** :
 1. `watcher --meta <url>`. Durée **au-delà de ~20 min** : demander avant de lire (`Vidéo de 48 min, ~12 000 tokens de transcript. La lire ?`).
-2. `watcher <url>` : **texte seul** par défaut (métadonnées + transcript).
-3. `--frames` seulement si l'utilisateur le demande, ou si la vidéo **n'a pas de parole** (transcript vide ou quasi vide). Lire les planches d'images est l'étape la plus coûteuse.
+2. `watcher --keep <url>` : **texte seul** par défaut (métadonnées + transcript), et la vidéo est archivée. Toute vidéo lue est archivée, sans tri : on ne sait pas d'avance ce qui servira, et la place n'est pas un souci.
+3. `--frames` (avec `--keep`) seulement si l'utilisateur le demande, ou si la vidéo **n'a pas de parole** (transcript vide ou quasi vide). Lire les planches d'images est l'étape la plus coûteuse.
 4. Code `2`, ou vidéo supprimée, privée ou indisponible : bloc **illisible**, avec la raison. Code `1` pour une autre cause (réseau, erreur passagère) : ne rien écrire, la vidéo reste non lue, et le dire dans la confirmation.
+5. Dernière ligne `archive: <clé> (…)` : noter la clé dans le bloc. `archive: échec (<raison>)` : écrire le bloc sans ligne `archive:` et donner la raison dans la confirmation (plafond atteint, accès Drive expiré…) ; le prochain `/pin vidéos` rattrapera.
+   **Plafond atteint** : la lecture et la fiche ne changent pas. Dire dans la confirmation la place utilisée (donnée par watcher), et proposer, sans rien faire soi-même : relever le plafond (`WATCHER_ARCHIVE_MAX`, voir la doc de watcher) ou faire le tri à la main dans `pins-videos`. Ne jamais supprimer ni alléger une archive (la vidéo brute pèse le plus, mais c'est la seule copie si la vidéo disparaît de la plateforme).
+
 
 **Section `## Vidéos`** du fichier du pin, après le corps, un bloc par URL dans l'ordre de `videos:` :
 
@@ -151,12 +172,27 @@ Rien à épingler ni à mettre à jour : l'aide.
 - **Hyperframes : vidéo en HTML animé** · https://vt.tiktok.com/ZSpFrp5bo/
   Claude écrit la vidéo en HTML/CSS animé, puis on l'exporte : idéal pour une démo produit.
   Limite : pas de vrai montage de rushs filmés.
+  archive: tiktok-7697573255380585760 · repères : 0:12 le prompt de départ ; 0:41 « le rendu reste du HTML » ; #9 timeline animée
 - https://vt.tiktok.com/ZSpFhCjCn/ · illisible : vidéo supprimée
 ```
 
 - 1 à 3 lignes par vidéo : ce qu'elle apporte **pour l'usage du pin** (méthode, outil cité, limite, chiffre qui décide). Jamais le transcript, jamais un résumé exhaustif : même test de chaque ligne que pour le corps. L'exemple ci-dessus est un exemple, jamais du contenu.
 - La section n'entre pas dans la longueur du corps (1 à 4 lignes, 8 pour une idée). Si la vidéo change ce qu'on sait, **mettre aussi à jour** le corps et le « utile quand ».
 - Une vidéo lue qui révèle un nouvel outil ou une idée : le proposer comme nouveau pin, en une ligne.
+- **Ligne `archive:`** : la clé `<plateforme>-<id>` est aussi le nom du dossier sur Drive ; c'est elle qui relie la fiche à sa matière. Suivie de 0 à 4 **repères** : un instant `m:ss` (transcript) ou une image `#n` (le numéro de sa case sur la planche-contact, qui est aussi son rang dans `frames/frames.json`), avec 3 à 6 mots sur ce qu'on y trouve. Un repère `#n` seulement pour une image **réellement vue** (planches lues, avec `--frames` ou faute de parole) : sans planches, seuls les repères `m:ss` sont permis. Un repère marque ce qu'on voudra **retrouver** (phrase forte à citer, visuel inspirant, chiffre, démonstration), pas un résumé. Ils servent d'index du contenu : on cherche dans le repo, puis on va chercher le fichier voulu dans l'archive.
+
+### Approfondir avec la matière d'une vidéo
+
+Quand l'utilisateur veut **plus que la fiche** d'une vidéo épinglée : une citation exacte, une image comme inspiration, un passage précis, tout ce qui est dit sur un point. Formulation naturelle, sans commande : « dans les vidéos de X, retrouve la phrase sur… », « montre-moi l'écran de la timeline », « qu'est-ce qu'il dit exactement sur le prix ? ». Ce n'est pas une recherche nouvelle : on relit ce qui est déjà archivé.
+
+1. **Trouver la vidéo** : le pin X (index ou `grep -r` dans `pins/`), puis le bloc de la vidéo et sa ligne `archive: <clé>`. Les repères disent souvent déjà où regarder.
+2. **Lire l'archive** :
+   - **Sur le PC** (watcher présent) : `watcher --restore <clé>` affiche le chemin du dossier. Y lire `README.md`, puis `transcript.json` (segments horodatés : c'est là qu'on cherche une citation exacte), `frames/frames.json` (instant de chaque image) et les images de `frames/`.
+   - **Ailleurs** (téléphone, claude.ai, session cloud) : avec le connecteur Google Drive, chercher le dossier `<clé>` (dans `pins-videos`), lire son `README.md`, puis les fichiers utiles. **Lecture seule** : ne jamais déplacer, modifier, partager ni supprimer quoi que ce soit dans l'archive.
+   - Ni watcher ni connecteur Drive : le dire en une ligne, avec où relancer.
+3. **Répondre** avec la source : `[0:41] « citation exacte »`, ou l'image (chemin sur le PC, lien Drive ailleurs) avec son instant.
+4. **Pas de ligne `archive:`** : la vidéo n'a pas été archivée. Si watcher est présent et la vidéo encore en ligne, proposer `/pin <X> vidéos`.
+5. Si la réponse mérite d'être retrouvée plus tard, proposer d'ajouter un **repère** au bloc (un seul, en une ligne) : c'est une mise à jour du pin, enregistrée comme les autres.
 
 ## Mettre à jour une entrée
 
@@ -320,7 +356,7 @@ Uniquement après un `git push` réussi :
 ```
 
 - Chaque nom est un **lien vers son fichier** : `https://github.com/<repo>/blob/main/pins/<slug>.md` (ou `…/pins/<slug>/README.md`), comme dans `/sonar`. Pour une idée en dossier, ajouter `· [dossier](…/pins/<slug>/dossier.md)`.
-- Vidéos lues : `· 2 vidéos lues, 1 illisible` ; vidéo restée non lue (échec passager) : le dire. Rien sur les vidéos si watcher était absente.
+- Vidéos lues : `· 2 vidéos lues et archivées, 1 illisible` ; vidéo restée non lue (échec passager) : le dire ; archive en échec : `· archive en échec : limite de 20 Go atteinte` (la raison donnée par watcher), rattrapé par le prochain `/pin vidéos`. Rien sur les vidéos si watcher était absente.
 - Pour un ajout, afficher le `useful-when` pour que l'utilisateur puisse le corriger d'un mot ; pour une mise à jour, ce qui a changé.
 - Pour une **idée ajoutée** en `noté` : une dernière ligne `À creuser ? /pin <slug> ?`.
 - Si l'identité de l'élément était ambiguë (plusieurs « heretic » possibles), une ligne pour dire lequel a été retenu.
