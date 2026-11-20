@@ -16,6 +16,7 @@
 | `published.txt` | Liste des skills publiés |
 | `docs/` | Docs de ce repo uniquement |
 | `scripts/release.sh` | La release |
+| `release-notes/<tag>.md` | Note réécrite d'une Release déjà publiée : la CI l'applique au push (une session Claude ne peut pas éditer une Release) |
 | `.github/workflows/release.yml` | Tag, zip et Release GitHub pour chaque commit de release |
 
 ## Release

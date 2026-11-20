@@ -1,0 +1,1 @@
+Quick search: still limited to pins (a single clone), but sonar now rereads the index and judges on meaning, with stars and one bullet per result; grep is only used to bring back details (place, address, date).

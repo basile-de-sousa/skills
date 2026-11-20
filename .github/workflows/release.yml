@@ -37,3 +37,15 @@ jobs:
             gh release create "$tag" "$name.zip" --target "$target" --title "$tag" \
               --notes "$(git log -1 --format=%b "$sha")"
           done
+      - name: Notes de release réécrites
+        # Un fichier release-notes/<tag>.md remplace la note de la Release du même tag
+        # (ex. notes d'avant le passage à l'anglais). Idempotent.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for f in release-notes/*.md; do
+            [ -f "$f" ] || continue
+            tag=$(basename "$f" .md)
+            gh release view "$tag" >/dev/null 2>&1 || continue
+            gh release edit "$tag" --notes-file "$f"
+          done

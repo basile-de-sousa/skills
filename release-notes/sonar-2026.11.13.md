@@ -1,0 +1,1 @@
+First share of sonar: when you start on a topic, it finds what you already saved (pins, buzzwords, notes, methods) and says why it helps or is better left aside. Set your repos in the Config block; a source that is not configured is ignored.

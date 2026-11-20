@@ -1,0 +1,1 @@
+One search and one format (stars, 1 to 3 bullets): a request to find one thing only changes the sources (pins only). The grep over pins brings back the details; a pin is opened only when the judgment needs it.

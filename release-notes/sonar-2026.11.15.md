@@ -1,0 +1,1 @@
+Quick search: a request to find something (e.g. "I would like to eat in Paris") only searches the pins, by grep, and answers with a raw list and the direct link to the original video (TikTok, Reel, YouTube). Sonar can also read methodo domain folders (README, then one card at most).
