@@ -50,6 +50,7 @@ status: draft | ready | in-progress | done
 depends: SPEC-NNN            # optional: must be done first
 supersedes: SPEC-NNN (AC2)   # optional: earlier behavior this spec replaces
 context: [path, path#section] # current-truth docs needed, relative to docs/; 2-5 entries
+checks: [name, name]          # optional: named pieces of the slow checks this spec touches
 ---
 # SPEC-NNN: Title
 ## Why
@@ -72,6 +73,8 @@ Acceptance criteria use EARS, one behavior each, each verifiable by a test or a 
 **Open questions** - one marker everywhere: a `## Open questions` section, in specs and in current-truth docs. Each item says what is undecided and what would settle it ("after the next playtest"). An accepted risk to watch is an open question with its trigger. If a project uses another marker, propose migrating it.
 
 `context` lists the current-truth docs or sections the implementer needs (and an ADR only if its reasoning matters). Keep it short: it is the reading list of `/spec run`.
+
+`checks` names the pieces of the slow checks (scenes, named cases; CLAUDE.md lists them) the spec touches. A forgotten one is caught at the next merge, where everything runs.
 
 **ADR** (MADR-lite) - `docs/adr/NNN-slug.md`, one flat folder, one numbering
 
@@ -188,7 +191,7 @@ All work happens on one branch: the current one, or one the run creates (`run/` 
 ### For each spec
 
 0. **Resume.** If the spec is already `in-progress` (an interrupted run), read its `## Plan` and its tagged commits since `docs: start SPEC-NNN`, and continue from the first unfinished step. If those commits are not on the current branch, say which branch has them and stop.
-1. **Check.** Read the spec, its `context` files, ADRs it links explicitly, and the code it touches. Do not load the rest of `docs/`. Without `context`, read the current-truth docs of the modules the spec names. Non-empty "Open questions" or a contradiction between spec, current-truth docs and code means blocked (see Decisions).
+1. **Check.** Read the spec, its `context` files, ADRs it links explicitly, and the code it touches. Do not load the rest of `docs/`, read long docs by section, and do not read module `CLAUDE.md` files by hand: the tool loads a folder's `CLAUDE.md` when you read a file in it. Why: a saturated context costs tokens and gets instructions ignored. Limit: a spec that changes shared code also reads the modules that depend on it. Without `context`, read the current-truth docs of the modules the spec names. Non-empty "Open questions" or a contradiction between spec, current-truth docs and code means blocked (see Decisions).
 2. **Start.** Set `status: in-progress`, commit `docs: start SPEC-NNN`.
 3. **Tests first (red).**
    - No test framework yet: set one up and add its commands to CLAUDE.md.
@@ -198,7 +201,9 @@ All work happens on one branch: the current one, or one the run creates (`run/` 
 4. **Implement (green).** Write a short task list in `## Plan`; no approval needed, `ready` is the approval. Implement until the tests pass, refactor, commit per task (Conventional Commits, `(SPEC-NNN)` in every message). The tests from step 3 are locked: if one looks wrong, the spec is wrong, so it is blocked.
    - When a module folder is created or first touched and has no `CLAUDE.md`, add a short one pointing to its current-truth doc (what the module owns, link, local conventions).
 5. **Update the current truth.** Write the rules this spec put in force into the current-truth docs listed in `context` (or create the right doc and index it in `docs/README.md`). If `supersedes` is set, append `(superseded by SPEC-NNN)` to the replaced criterion in the earlier spec.
-6. **Verify, at the right cost.** Fast checks (typecheck, unit tests) run in full for every spec: a regression is caught on its own commit, and undoing a spec stays a plain revert. Slow checks (browser, end-to-end, visual) run only on what the spec touches, then in full after each merge and at the end of the run, where cross effects show. While developing, only the related tests. Limits: if you cannot tell what a spec touches, run everything. A check that fails then passes on a rerun is flaky, not green: stabilize it (fix lane) or record it as an open question, and name it in the report.
+6. **Verify, at the right cost.** Fast checks (typecheck, unit tests) run in full for every spec: a regression is caught on its own commit, and undoing a spec stays a plain revert. Slow checks (browser, end-to-end, visual) are built as named pieces that can run alone (scenes, named cases): per spec, run the pieces in `checks`; in full after each merge and at the end of the run, where cross effects show (in a serial run, also every few specs, so defects do not pile up). While developing, only the related tests. Limits: a slow check that is still one long path is not paid per spec: it runs at merges and at the end, and splitting it is recorded as an open question. With pieces but no `checks`, and no way to tell what the spec touches, run everything. A check that fails then passes on a rerun is flaky, not green: stabilize it (fix lane) or record it as an open question, and name it in the report.
+   - **A defect seen becomes a rule.** A defect found by looking at screenshots becomes an automatic rule of the slow check, applied to every screen; if it cannot be automated, a named case. Why: a rule costs almost nothing per screenshot and protects future screens. Limit: a rule that gives a false positive is narrowed or goes back to a named case, never weakened quietly.
+   - **A defect seen outside the spec** becomes a tracked entry at once (an open question or a `draft` fix spec), written on the class of the defect ("titles hidden under the top bar"), not on the one screen seen. Why: a sentence in a report gets fixed on its symptom at best, and is found again later. A subagent reports it and the orchestrator creates the entry on receipt; alone, create it yourself. Do not rely on someone rereading reports.
    - CLAUDE.md says which commands are slow and how to target them; if it does not, add that line (a docs commit) and mention it in the report. If the commands exist and the repo has no CI yet, add a minimal CI running the fast ones (`ci: ...` commit).
 7. **Close.** Tick the criteria, fill `## Implementation notes`, set `status: done`, and commit that alone as `docs: done SPEC-NNN`, even right after another docs commit: the status dates finished specs from this message.
 
@@ -215,11 +220,12 @@ Judge by the cost of being wrong:
 
 ### Several specs (`all` or a list)
 
-- **One fresh subagent per spec**, to keep each context small. Its prompt: "Load the /spec skill. Run SPEC-NNN following its 'For each spec' section, on branch <branch>. Never ask the user: if blocked, apply the blocked rule and report." The orchestrator handles the start of the run, the merges and the end. Never ask questions during the run; everything waiting for the user goes in the final report.
+- **One fresh subagent per spec**, to keep each context small. Its prompt: "Load the /spec skill. Run SPEC-NNN following its 'For each spec' section, on branch <branch>. Never ask the user: if blocked, apply the blocked rule and report. In your report, list the files you read and the time your slow checks took." Add no reading list to it: the spec's `context` is the reading list, and the tool loads module `CLAUDE.md` files on its own. The orchestrator handles the start of the run, the merges and the end. Never ask questions during the run; everything waiting for the user goes in the final report.
 - **Independent specs run in parallel, 2 or 3 at once**: no `depends` between them, and no code they both reshape (same component, same engine function). Why: the run finishes sooner. Limits: in doubt, one after the other; a spec that depends on another or touches its code waits for its merge; parallel spends the same quota faster, so after a run that hit the usage limit, stay serial.
 - **One worktree and branch per parallel spec** (`<run-branch>-NNN`, from the run branch), in a folder the test runner and dev server ignore (e.g. `.claude/worktrees`; set that up first). Why: two agents in one tree corrupt each other's commits and test runs. Tell each agent which files the others are changing, so it keeps its edits there small. Agents never push to the run branch: the orchestrator's tree only receives merges.
 - **Merge as each one ends** (`--no-ff`: one merge commit per spec), then run the full checks and the consistency checks, and reread every current-truth section both sides changed. "Both added" is fine for a glossary, an index or a stylesheet; two rules for the same thing is a contradiction to resolve. Then start what the merge unblocks.
 - **Repo-wide checks** (visual audit, dev server, end-to-end tests) run once, by the orchestrator, after merges; agents describe the visual checks they need.
+- **An open look at the screenshots**, by an agent that did not write the code: after each merge on the screenshots that changed, at the end of the run on all of them. Why: rules only catch defects already known, and an author looks only at its own feature. Limits: the "changed" filter needs screenshots that are stable from one launch to the next (clocks, animations); check that before relying on it. A defect missed on a screenshot that no longer changes is only seen again at the full look. In a run with a single agent, a fresh subagent does the look.
 - A parallel spec that fails: delete its worktree and branch, set the spec back to `draft` with the question.
 
 ### End of the run
@@ -227,7 +233,7 @@ Judge by the cost of being wrong:
 - Run the full test suite and checks once more, to catch regressions between specs.
 - Push the branch (on the default branch only if the user said yes at the start or the saved choice is `default`).
 - If the run created the branch, open a pull request into the default branch (not a draft), titled with what it holds ("Autorun 2026-11-08: 4 specs, 2 items for you"), with the report as its description. Merging it is the approval; closing it and deleting the branch undoes the run. No pull request without a GitHub remote or when the project's rules forbid it; without a tool to open one, put the report in the last commit message, so it stays with the branch.
-- Report in a few lines (the pull request description when there is one): branch, specs done with their commit range (`git log --oneline --grep "SPEC-NNN"`) and the slow checks each one ran, flaky checks found, specs sent back to `draft` with their question, proposed ADRs, suggestions worth a look. Add how to undo one spec: `git revert -m 1 <merge>` for a merged parallel spec, else `git revert <first>^..<last>`.
+- Report in a few lines (the pull request description when there is one): branch, specs done with their commit range (`git log --oneline --grep "SPEC-NNN"`), the slow checks each one ran and its duration (timestamps of its `docs: start` and `docs: done` commits), the time spent in slow checks apart, the words each agent loaded (`wc -w` on the files it read), flaky checks found, specs sent back to `draft` with their question, proposed ADRs, suggestions worth a look. Add how to undo one spec: `git revert -m 1 <merge>` for a merged parallel spec, else `git revert <first>^..<last>`. Why the measures: a run is tuned on them, not on an impression, and they tell which change brought a gain. Limit: one run gives a trend, not a reliable figure.
 
 ## Autorun: `/spec autorun` (Claude Code only)
 
