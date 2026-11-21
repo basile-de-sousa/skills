@@ -4,8 +4,10 @@
 # Les valeurs du bloc Config d'un skill sont masquées (voir mask_config), et un skill
 # qui contient encore le nom du compte du repo de partage n'est pas publié (check_owner).
 # Le tag, le zip et la Release GitHub sont créés par la CI au push.
-# Usage : sh scripts/release.sh            (puis : git push)
-#   RELEASE_NOTE="pourquoi ce changement"  -> corps du commit, repris dans la Release GitHub
+# Usage : sh scripts/release.sh [skill ...]  (puis : git push)
+#   skill ...                              -> ne publier que ces skills (sinon tous ceux qui diffèrent)
+#   RELEASE_NOTE="pourquoi ce changement"  -> corps du commit, repris dans la Release GitHub.
+#                                             Une note ne vaut que pour un skill : refus si plusieurs diffèrent.
 #   SKILLS_DIR=/chemin/du/cache            -> si le cache n'est pas à l'endroit habituel
 set -eu
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
@@ -24,6 +26,20 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 released=""
 failed=""
+changed=""
+
+# Arguments : les seuls skills à publier. Chacun doit être dans published.txt.
+for arg in "$@"; do
+  if ! grep -Fxq -- "$arg" published.txt || [ "${arg#\#}" != "$arg" ]; then
+    echo "Skill inconnu de published.txt : $arg" >&2; exit 1
+  fi
+done
+wanted() {
+  [ "$#" -eq 1 ] && return 0
+  w=$1; shift
+  for a in "$@"; do [ "$a" = "$w" ] && return 0; done
+  return 1
+}
 
 # Masque les valeurs du bloc Config de skills/<nom>/SKILL.md (entre <!-- config --> et
 # <!-- /config -->) : chaque valeur entre backticks devient `<à définir>`.
@@ -93,8 +109,10 @@ restore() {
   git checkout -q HEAD -- "skills/$1" 2>/dev/null || true
 }
 
+# Passe 1 : copier, masquer et vérifier chaque skill, sans rien commiter.
 while read -r name; do
   case "$name" in ''|'#'*) continue ;; esac
+  wanted "$name" "$@" || continue
   if [ ! -f "$SRC/$name/SKILL.md" ]; then
     echo "Ignoré : $name absent du cache." >&2; continue
   fi
@@ -104,17 +122,31 @@ while read -r name; do
     restore "$name"; failed="$failed $name"; continue
   fi
   git add -A "skills/$name"
-  if git diff --cached --quiet; then continue; fi
+  if git diff --cached --quiet -- "skills/$name"; then continue; fi
+  changed="$changed $name"
+done < published.txt
+
+# Une note décrit un seul changement : avec plusieurs skills, elle serait fausse pour les autres.
+set -- $changed
+if [ -n "${RELEASE_NOTE:-}" ] && [ "$#" -gt 1 ]; then
+  for name in "$@"; do restore "$name"; done
+  echo "RELEASE_NOTE fournie, mais plusieurs skills diffèrent :$changed" >&2
+  echo "Rien n'est publié. Relancer avec un seul nom : sh scripts/release.sh <skill>" >&2
+  exit 1
+fi
+
+# Passe 2 : un commit de release par skill qui diffère.
+for name in "$@"; do
   ver=$(date -u +%Y.%m.%d); tag="$name-$ver"; n=2
   while git log --format=%s | grep -Fxq "release: $tag"; do
     tag="$name-$ver.$n"; n=$((n + 1))
   done
   if [ -n "${RELEASE_NOTE:-}" ]; then
-    git commit -q -m "release: $tag" -m "$RELEASE_NOTE"
+    git commit -q -m "release: $tag" -m "$RELEASE_NOTE" -- "skills/$name"
   else
-    git commit -q -m "release: $tag"
+    git commit -q -m "release: $tag" -- "skills/$name"
   fi
   released="$released $tag"
-done < published.txt
+done
 if [ -z "$released" ]; then echo "Rien à publier."; else echo "Publié :$released"; fi
 if [ -n "$failed" ]; then echo "Non publiés :$failed" >&2; exit 1; fi

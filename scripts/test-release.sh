@@ -160,5 +160,46 @@ if [ "$RC" -eq 0 ] && [ -e skills/j/SKILL.md ] && printf '%s' "$OUT" | grep -qi 
   ok "SPEC-002 AC4: compte inconnu, la vérification est signalée comme sautée"
 else fail "SPEC-002 AC4: compte inconnu, la vérification est signalée comme sautée"; fi
 
+# SPEC-003 : une note de release ne s'applique qu'à un seul skill
+run_with() { note=$1; shift; OUT=$(RELEASE_NOTE="$note" SKILLS_DIR="$T/src" sh scripts/release.sh "$@" 2>&1); RC=$?; }
+two() { setup k l; printf '# K\n' | skill k; printf '# L\n' | skill l; }
+
+# SPEC-003 AC1 : seuls les skills nommés sont publiés
+two
+run_with "" k
+if [ "$RC" -eq 0 ] && [ -e skills/k/SKILL.md ] && [ ! -e skills/l ] && [ "$(commits)" = 2 ]; then
+  ok "SPEC-003 AC1: seuls les skills donnés en argument sont publiés"
+else fail "SPEC-003 AC1: seuls les skills donnés en argument sont publiés"; fi
+
+# SPEC-003 AC2 : argument absent de published.txt
+two
+run_with "" k zzz
+if [ "$RC" -ne 0 ] && [ "$(commits)" = 1 ] && [ ! -e skills/k ] && printf '%s' "$OUT" | grep -q 'zzz'; then
+  ok "SPEC-003 AC2: argument absent de published.txt, aucun commit et l'argument est nommé"
+else fail "SPEC-003 AC2: argument absent de published.txt, aucun commit et l'argument est nommé"; fi
+
+# SPEC-003 AC3 : une note, plusieurs skills qui diffèrent
+two
+run_with "note pour k" 
+if [ "$RC" -ne 0 ] && [ "$(commits)" = 1 ] && [ ! -e skills/k ] && [ ! -e skills/l ] \
+   && [ -z "$(git status --porcelain)" ] && printf '%s' "$OUT" | grep -q 'k l'; then
+  ok "SPEC-003 AC3: une note et plusieurs skills, aucun commit et les skills sont listés"
+else fail "SPEC-003 AC3: une note et plusieurs skills, aucun commit et les skills sont listés"; fi
+
+# SPEC-003 AC4 : une note, un seul skill publié
+two
+run_with "note pour k" k
+if [ "$RC" -eq 0 ] && [ "$(commits)" = 2 ] && [ "$(git log -1 --format=%b)" = "note pour k" ] && [ ! -e skills/l ]; then
+  ok "SPEC-003 AC4: une note et un seul skill, la note est le corps du commit"
+else fail "SPEC-003 AC4: une note et un seul skill, la note est le corps du commit"; fi
+
+# SPEC-003 AC5 : sans note, tout ce qui diffère est publié, sans corps
+two
+run_with ""
+if [ "$RC" -eq 0 ] && [ "$(commits)" = 3 ] && [ -z "$(git log -2 --format=%b)" ] \
+   && [ -e skills/k/SKILL.md ] && [ -e skills/l/SKILL.md ]; then
+  ok "SPEC-003 AC5: sans note, chaque skill qui diffère est publié sans corps de commit"
+else fail "SPEC-003 AC5: sans note, chaque skill qui diffère est publié sans corps de commit"; fi
+
 [ "$fails" -eq 0 ] && echo "Tous les tests passent." || echo "$fails test(s) en échec."
 exit "$fails"
