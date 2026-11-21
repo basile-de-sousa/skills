@@ -1,5 +1,5 @@
 ---
-status: draft
+status: ready
 context: [architecture.md#release]
 ---
 # SPEC-003: Une note de release ne s'applique qu'à un seul skill
