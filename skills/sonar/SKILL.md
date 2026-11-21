@@ -1,6 +1,6 @@
 ---
 name: "sonar"
-description: "Chercher ce que l'utilisateur a déjà sur un sujet dans ses stockages (pins, buzzwords, notes, méthodes) et expliquer en quoi ça le concerne. Utiliser sur /sonar (seul, ?, sujet) ou « qu'est-ce que j'ai sur… »."
+description: "Chercher ce que l'utilisateur a déjà sur un sujet dans ses stockages (pins, buzzwords, notes, méthodes) et expliquer en quoi ça le concerne. Utiliser sur /sonar (seul, ?, sujet) ou « qu'est-ce que j'ai sur… ». Quand l'utilisateur démarre un projet, une spec ou un choix d'outil : proposer /sonar ? en une ligne, sans le lancer."
 ---
 
 # Sonar
@@ -16,6 +16,8 @@ description: "Chercher ce que l'utilisateur a déjà sur un sujet dans ses stock
 Chaque valeur désigne la source du même nom (repos GitHub `compte/nom`, produits par les skills `/pin`, `/buzzword` et `/methodo`). Une valeur à `<à définir>` : la source est **ignorée** et signalée dans la dernière ligne (`_Non configuré : buzzwords._`). Si **aucune** source n'est configurée au premier appel, demander à l'utilisateur ses repos, puis proposer une modification de ce skill qui les inscrit dans ce bloc. Le bloc ne contient jamais de secret.
 
 Objectif : quand l'utilisateur démarre un sujet ou un projet, lui ressortir ce qu'il a déjà gardé et qui pourrait servir, avec **pourquoi** ça le concerne, et ce qu'il vaut mieux écarter. Sonar **lit seulement** : il n'écrit, ne crée ni ne modifie rien.
+
+**Se proposer au démarrage** : quand l'utilisateur démarre un projet, une spec ou un choix d'outil, proposer `/sonar ?` en une ligne, sans le lancer (sonder prend du temps, c'est à lui de dire oui). Pourquoi : ce qu'il a gardé ne sert que si ça ressort à ce moment-là, et un rappel qui dépend de sa mémoire est oublié. Pas pour une question ponctuelle, en exécution pressée, ni si sonar a déjà tourné dans la conversation. Une proposition refusée n'est pas refaite pour le même sujet.
 
 ## Usages
 
@@ -118,6 +120,7 @@ _Methodo : aucun dossier ni méthode sur le sujet. Notes : aucun sujet sur la 3D
   - Idée en **dossier** en ★★★ : une puce qui le signale (**Dossier** : N décisions, questions ouvertes).
 - **À écarter** : les entrées qui correspondent au thème mais ne conviennent pas, une ligne chacune avec la **raison**. Seulement quand la raison vient de l'entrée elle-même (avis, limites), d'un meilleur résultat trouvé, ou de la **contrainte posée par la requête** (« exclu par ta contrainte : exige WebGPU ») ; sinon ne pas les mentionner.
 - Au plus 6 résultats, plus « À écarter » ; au-delà, dire combien d'autres sont plus loin du sujet.
+- **Servi ?** Quand un pin ressort en ★★★ pour un choix d'outil ou un projet et n'a pas déjà un avis « utilisé », ajouter avant la dernière ligne : `Servi ? /pin <slug> ! utilisé dans <projet>`. Pourquoi : c'est la seule trace de ce qui a réellement servi, et sonar ne l'écrit pas lui-même (il lit seulement, c'est `/pin` qui enregistre). Une seule ligne, pour le pin le plus pertinent ; rien quand la demande est de retrouver une chose précise (un lieu, un lien).
 - Dernière ligne en italique : sources **non sondées** (et pourquoi), vides ou inaccessibles, en quelques mots. Ex. : `_Non sondé : methodo, notes (sans rapport). /sonar all : … pour tout sonder._` Avec un filtre : `_Sondé : pins, buzzwords (filtre)._`
 - Rien de pertinent : `**Contexte** : …` puis `Rien dans <sources sondées>.` (et la ligne des sources non sondées, pour pouvoir élargir). Ne pas combler avec des résultats faibles ni avec des connaissances générales.
 - Pas d'introduction, pas de conclusion. Français, en gardant les termes techniques anglais usuels.
