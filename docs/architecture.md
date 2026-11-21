@@ -35,6 +35,8 @@ Un skill sans repo (`trad`, `note`) n'a ni specs ni ADR : son historique ici et 
 
 La note de release (`RELEASE_NOTE`) résume le changement pour ceux qui installent le skill. Le raisonnement complet reste dans le repo du skill.
 
+Une note ne vaut que pour **un** skill : `sh scripts/release.sh <skill>` ne publie que les skills nommés, et le script refuse de commiter si une note est fournie alors que plusieurs skills diffèrent (il les liste). Pourquoi : la note est recopiée dans la Release publique, et des modifications déjà enregistrées sur claude.ai mais jamais publiées partiraient avec la note d'un autre skill (vu le 2026-11-21). Sans note, tout ce qui diffère est publié, chaque commit sans corps.
+
 ## Ce qui est publié
 Le repo est public, sans licence (choix de Basile). Un skill entre dans `published.txt` quand :
 - il fonctionne chez quelqu'un d'autre : ce qui est propre à l'utilisateur (repo de données) tient dans son bloc Config, masqué à la release, et le skill le demande quand il vaut `<à définir>` ;
