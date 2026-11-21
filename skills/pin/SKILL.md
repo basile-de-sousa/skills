@@ -1,6 +1,6 @@
 ---
 name: "pin"
-description: "Épingler un outil, site, techno, idée ou lecture avec un « utile quand » pour le retrouver au bon moment. Utiliser sur /pin (seul : l'aide ; avec une url, un nom ou un texte), /pin ? ou « pin ça »."
+description: "Épingler un outil, site, techno, idée ou lecture avec un « utile quand » pour le retrouver au bon moment. Utiliser sur /pin (seul : l'aide ; avec une url, un nom ou un texte), /pin ?, /pin ménage ou « pin ça »."
 ---
 
 # Pin
@@ -40,6 +40,7 @@ Un pin n'est **pas une tâche** : une chose à faire avec une échéance (corrig
 | `/pin <X> vidéos [--frames]` | Pareil, pour le seul pin X |
 | « dans les vidéos de X, … » | **Approfondir** avec la matière d'une vidéo : citation exacte, image, détail (voir plus bas) |
 | `/pin ?` ou « pin ça » | **Où j'en suis** : d'abord le **bilan de la conversation** s'il y a eu une discussion (nouveaux éléments à épingler **et** pins à mettre à jour, enregistrés après ton « ok »), puis l'**état des lieux** (à creuser, explorés récemment, suggestions, vidéos en attente). Voir plus bas |
+| `/pin ménage` | **Trier** les pins `noté` jamais repris depuis longtemps : supprimer, garder ou creuser, toujours après validation (voir « Ménage ») |
 | `/pin` **seul** (aussi `/pin aide`, `/pin help`) | **Aide**, toujours, même après une discussion (voir plus bas) |
 
 Les formulations naturelles marchent aussi (« /pin WebGPU je veux m'y pencher », « /pin wllama écarté, trop lent ») : `?` et `!` ne sont que des raccourcis.
@@ -55,6 +56,7 @@ Réponse immédiate, **aucun outil** : expliquer le skill, pas l'état du repo.
 - `/pin vidéos` : lire et archiver sur ton Drive **toutes** les vidéos en attente (sur ton PC, avec watcher) ; `/pin X vidéos` pour un seul pin
 - « dans les vidéos de X, retrouve la phrase sur… » : je vais chercher dans l'archive
 - `/pin ?` (ou « pin ça ») : où tu en es. Après une discussion, je propose d'abord ce qu'il faut épingler ou mettre à jour ; puis ce qui est à creuser, exploré récemment, à reprendre, et les vidéos en attente
+- `/pin ménage` : trier les pins jamais repris depuis longtemps (rien n'est supprimé sans ton accord)
 - Pour retrouver : `/sonar <sujet>` · cette aide : `/pin`
 ```
 
@@ -77,6 +79,7 @@ Ajouter **une seule ligne de conseil** si la conversation en donne l'occasion (p
 - Si l'utilisateur ne donne pas d'avis, le **déduire de la conversation** quand elle le dit clairement ; sinon, pas d'avis.
 - `status-since` : la date du dernier **changement de statut** (pas de contenu). C'est elle qui sert à « depuis X » dans `/pin ?`.
 - Un nouvel avis **remplace** l'ancien. On peut repasser d'`exploré` à `à creuser` (nouvelle question).
+- **« Utilisé » est la trace d'usage** : dès qu'un pin sert à un projet ou à une décision, il passe en `exploré` avec `utilisé : <projet>`, même sans exploration poussée. Pourquoi : un stock de pins se juge à ce qui a servi, pas à sa taille, et c'est la seule mesure qu'on en a. Pas de champ à part : le statut et l'avis suffisent.
 
 **Suggérer `à creuser`, sans le poser** : à la création d'une **idée**, la confirmation ajoute `À creuser ? /pin <slug> ?`. Un oui d'un mot suffit ; sans réponse, l'idée reste `noté`.
 
@@ -115,6 +118,7 @@ Lire `index.md` (type, statut et avis y figurent), puis en local, sans ouvrir le
 - **À creuser ?** : **au plus 3** pins `noté` qui mériteraient de l'être, chacun avec la raison en quelques mots. Priorité : les **idées** de l'utilisateur (une idée jamais reprise se perd), puis un pin dont dépendent plusieurs autres (`links`), puis ceux liés à un pin `à creuser` ou au sujet de la conversation en cours. Jamais une suggestion sans lien avec ce qui occupe l'utilisateur. Ne suggérer que ce qui a une vraie raison ; sinon, omettre la section.
 - Section vide : l'omettre. Tout vide : `Rien à creuser, rien d'exploré récemment.`
 - La ligne ⚠ n'apparaît que s'il y a des entrées concernées ; si l'utilisateur répond non, repasser l'entrée en `noté`.
+- **Ménage** (état **déduit**, jamais stocké) : compter, avec les `status-since` déjà lus, les pins `noté` depuis plus de ~6 mois. À partir de 5, une ligne : `🧹 8 pins notés depuis plus de 6 mois, jamais repris → /pin ménage`. En dessous, rien.
 - **Vidéos** (état **déduit**, jamais stocké ; `pin ?` signale, il ne lit rien) : une URL de `videos:` **non lue** n'a aucun bloc dans la section `## Vidéos` de son pin (`grep -F '<url>'` dans le fichier) ; une vidéo **non archivée** a un bloc lu sans ligne `archive:`. Un bloc « illisible » compte comme traité. Afficher le **nombre** de vidéos à lire et à archiver et de pins concernés, puis au plus 3 pins en liste, ceux `à creuser` d'abord. Rien en attente : ne pas parler des vidéos.
 
 ## Bilan de conversation (première partie de `/pin ?`)
@@ -122,7 +126,8 @@ Lire `index.md` (type, statut et avis y figurent), puis en local, sans ouvrir le
 1. **Lire `index.md`** (cloner ou `git pull` le repo).
 2. **Repérer les pins concernés** par la conversation :
    - ceux déjà épinglés **plus tôt dans cette conversation**, puis rediscutés ;
-   - ceux de l'index dont le sujet a été **discuté en profondeur** ici (pas une simple mention).
+   - ceux de l'index dont le sujet a été **discuté en profondeur** ici (pas une simple mention) ;
+   - ceux qui ont **servi** ici : ressortis par `/sonar` ou cités, puis retenus pour un choix ou un projet. Les proposer en `exploré · utilisé : <projet>`.
    Ouvrir uniquement ces fichiers-là.
 3. **Vérifier les voisins** : pour chaque pin mis à jour, relire dans l'index la ligne de ses `links`. Si une décision de la conversation **contredit** ou **change** l'un d'eux (piste abandonnée, outil retenu comme brique, nouvelle limite), l'ajouter aux mises à jour.
 4. **Repérer les nouveaux éléments** à épingler (outils, technos, **idées propres à l'utilisateur**). Si la conversation donne déjà un verdict, le nouvel élément est créé directement avec ce statut et cet avis.
@@ -193,6 +198,35 @@ Quand l'utilisateur veut **plus que la fiche** d'une vidéo épinglée : une cit
 3. **Répondre** avec la source : `[0:41] « citation exacte »`, ou l'image (chemin sur le PC, lien Drive ailleurs) avec son instant.
 4. **Pas de ligne `archive:`** : la vidéo n'a pas été archivée. Si watcher est présent et la vidéo encore en ligne, proposer `/pin <X> vidéos`.
 5. Si la réponse mérite d'être retrouvée plus tard, proposer d'ajouter un **repère** au bloc (un seul, en une ligne) : c'est une mise à jour du pin, enregistrée comme les autres.
+
+## Ménage : `/pin ménage`
+
+Un stock qui ne fait que grossir finit en bruit : chaque pin périmé est un distracteur de plus pour une recherche. Le ménage retire ce qui a vieilli, **jamais sans l'accord de l'utilisateur**.
+
+1. Lire `index.md`, puis `grep -H '^status-since' -r pins`, sans ouvrir les fichiers un par un.
+2. **Candidats** : les pins `noté` dont le `status-since` a plus de ~6 mois (ni creusés, ni utilisés depuis). Laisser de côté ce qui ne périme pas comme un outil : repérages de lieux, de sorties, d'achats, recettes. Une **idée** de l'utilisateur n'est jamais proposée à la suppression : la suggérer `à creuser`. Signaler aussi les **doublons probables** (la même chose sous deux noms).
+3. **Proposer en une liste**, au plus 10 à la fois, les plus anciens d'abord :
+
+```
+**À trier** (notés depuis plus de 6 mois, jamais repris)
+1. [**Bruno**](lien) · outil · tester une API en équipe · supprimer ?
+2. [**public-apis**](lien) · site · trouver une API gratuite · supprimer ?
+
+**Doublons ?**
+3. **WebLLM** et **MLC LLM** : même outil ? fusionner dans WebLLM ?
+
+Réponds par ligne : « 1 supprimer, 2 garder, 3 oui ». Sans réponse, rien ne change.
+```
+
+4. **Appliquer**, en un seul commit :
+   - **supprimer** : `git rm` du fichier (ou du dossier), retirer sa ligne d'index et les `pin:<slug>` qui pointent vers lui. Git garde l'historique.
+   - **garder** : `status-since` passe à aujourd'hui (seule exception à sa définition) : le pin est reconfirmé et ne reviendra pas avant 6 mois.
+   - **à creuser** : comme `/pin X ?`.
+   - **fusionner** : comme « Pas de doublon », l'entrée gardée reprend ce que l'autre avait d'utile.
+
+- Aucun candidat : `Rien à trier.`
+- Le seuil de 6 mois est une valeur de départ, pas une mesure : l'ajuster si le ménage propose trop, ou jamais rien.
+- Les exemples ci-dessus sont des exemples, jamais du contenu.
 
 ## Mettre à jour une entrée
 
@@ -342,7 +376,7 @@ Repo de données (bloc Config), branche `main`, **un seul commit par appel** (sa
 3. Écrire les fichiers et la ligne d'index, `git add`, un seul `git commit`, `git push origin main`.
 4. L'intégration GitHub de synchronisation des sources d'un Project est en lecture seule : ne pas s'arrêter là.
 
-Message de commit : `docs(pin): add three-js; update webgpu, chat-local-navigateur` (`add` pour une création, `update` pour une mise à jour, séparés par `;`).
+Message de commit : `docs(pin): add three-js; update webgpu, chat-local-navigateur` (`add` pour une création, `update` pour une mise à jour, `remove` pour une suppression du ménage, séparés par `;`).
 
 ## Confirmation
 
